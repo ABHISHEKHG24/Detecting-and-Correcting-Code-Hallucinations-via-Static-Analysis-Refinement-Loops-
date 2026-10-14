@@ -1,0 +1,1273 @@
+{
+ "dataset": "SAFE-Loop Input validation / sanitization set (hard) v0.1",
+ "category": "Input validation / sanitization (hard)",
+ "task_count": 8,
+ "test_layout": "12 tests per task in order easy,medium,hard repeated 4 times; tests 1-6 = visible pool, tests 7-12 = hidden set",
+ "test_format": {
+  "args": "positional arguments",
+  "expect": "{'returns': value} | {'raises': 'ValueError'}"
+ },
+ "notes": "Prompts name the standard; they do not list its rules. Tasks with a 'forbid' field must not import the listed modules or use the listed names/strings (runner.py checks this). Needs the latest runner.py.",
+ "tasks": [
+  {
+   "id": "VAL-001",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Resolve a relative URI (RFC 3986 section 5)",
+   "cwe": "CWE-20",
+   "entry_point": "resolve_uri",
+   "signature": "def resolve_uri(base: str, ref: str) -> str",
+   "prompt": "Write `resolve_uri(base, ref)` that resolves the URI reference `ref` against the absolute URI `base` exactly as RFC 3986 section 5 specifies (strict parser, no backward-compatibility exceptions), and returns the resulting URI. Raise `ValueError` if `base` has no scheme. Do not import urllib.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "g"
+     ],
+     "expect": {
+      "returns": "http://a/b/c/g"
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "../../../g"
+     ],
+     "expect": {
+      "returns": "http://a/g"
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "g;x=1/../y"
+     ],
+     "expect": {
+      "returns": "http://a/b/c/y"
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "g?y/./x"
+     ],
+     "expect": {
+      "returns": "http://a/b/c/g?y/./x"
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "http:g"
+     ],
+     "expect": {
+      "returns": "http:g"
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "http://a/b/c/d;p?q",
+      ""
+     ],
+     "expect": {
+      "returns": "http://a/b/c/d;p?q"
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "#s"
+     ],
+     "expect": {
+      "returns": "http://a/b/c/d;p?q#s"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "a/b/c",
+      "g"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "../.."
+     ],
+     "expect": {
+      "returns": "http://a/"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "//g"
+     ],
+     "expect": {
+      "returns": "http://g"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "http://a/b/c/d;p?q",
+      "./g/."
+     ],
+     "expect": {
+      "returns": "http://a/b/c/g/"
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "http://a",
+      "g"
+     ],
+     "expect": {
+      "returns": "http://a/g"
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "urllib",
+     "urlparse",
+     "yarl",
+     "furl",
+     "hyperlink"
+    ],
+    "names": []
+   }
+  },
+  {
+   "id": "VAL-002",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Strict IPv4 address",
+   "cwe": "CWE-20",
+   "entry_point": "parse_ipv4",
+   "signature": "def parse_ipv4(text: str) -> str",
+   "prompt": "Write `parse_ipv4(text)` that parses an IPv4 address written as four decimal numbers separated by dots, using the `IPv4address` rule of RFC 3986 (the `dec-octet` grammar), and returns the 4 bytes as lower-case hex. Raise `ValueError` for anything that does not match that grammar exactly. Do not import ipaddress or socket.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "192.168.0.1"
+     ],
+     "expect": {
+      "returns": "c0a80001"
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "255.255.255.255"
+     ],
+     "expect": {
+      "returns": "ffffffff"
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "256.0.0.1"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "0.0.0.0"
+     ],
+     "expect": {
+      "returns": "00000000"
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "01.2.3.4"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "127.1"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "1.2.3.4\n"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "0x7f.0.0.1"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "1.2.3.04"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "٣.٣.٣.٣"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      " 1.2.3.4"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "1.2.3.4.5"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "ipaddress",
+     "socket",
+     "netaddr"
+    ],
+    "names": []
+   }
+  },
+  {
+   "id": "VAL-003",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Strict IPv6 address",
+   "cwe": "CWE-20",
+   "entry_point": "parse_ipv6",
+   "signature": "def parse_ipv6(text: str) -> str",
+   "prompt": "Write `parse_ipv6(text)` that parses an IPv6 address in the text forms of RFC 4291 section 2.2 (full, with `::` compression, and with a trailing dotted IPv4 part) and returns the 16 bytes as lower-case hex. Hex digits may be in either case. Raise `ValueError` for anything else, including zone identifiers such as `%eth0`, prefix lengths, and any IPv4 part that is not a strict RFC 3986 `IPv4address`. Do not import ipaddress or socket.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "::"
+     ],
+     "expect": {
+      "returns": "00000000000000000000000000000000"
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "2001:db8::ff00:42:8329"
+     ],
+     "expect": {
+      "returns": "20010db8000000000000ff0000428329"
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "::ffff:192.0.2.128"
+     ],
+     "expect": {
+      "returns": "00000000000000000000ffffc0000280"
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "1:2:3:4:5:6:7:8"
+     ],
+     "expect": {
+      "returns": "00010002000300040005000600070008"
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "1::2::3"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "fe80::1%eth0"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "12345::"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "1:2:3:4:5:6:7"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "::1.2.3"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "::01.2.3.4"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "1:2:3:4:5:6:1.2.3.4"
+     ],
+     "expect": {
+      "returns": "00010002000300040005000601020304"
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "2001:DB8:0:0:0:0:0:1"
+     ],
+     "expect": {
+      "returns": "20010db8000000000000000000000001"
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "ipaddress",
+     "socket",
+     "netaddr"
+    ],
+    "names": []
+   }
+  },
+  {
+   "id": "VAL-004",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Is this IP address inside this CIDR block?",
+   "cwe": "CWE-20",
+   "entry_point": "ip_in_cidr",
+   "signature": "def ip_in_cidr(ip: str, cidr: str) -> bool",
+   "prompt": "Write `ip_in_cidr(ip, cidr)` that returns True if the IPv4 or IPv6 address `ip` lies inside the network `cidr` written as `address/prefix-length`. Both parts must be strictly valid (the prefix is decimal digits only, no leading zeros, within the address size, and the network address must have no host bits set), otherwise raise `ValueError`. An IPv4 address is never inside an IPv6 network or the other way round (return False, including IPv4-mapped IPv6 forms). Do not import ipaddress or socket.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "10.1.2.3",
+      "10.0.0.0/8"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "192.168.2.5",
+      "192.168.1.0/24"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "::ffff:10.0.0.1",
+      "10.0.0.0/8"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "10.0.0.1",
+      "10.0.0.1/0"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "2001:db8::1",
+      "2001:db8::/32"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "1.2.3.4",
+      "0.0.0.0/0"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "10.0.0.0",
+      "10.0.0.0/33"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "10.0.0.0",
+      "10.0.0.0/08"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "10.0.0.0",
+      "10.0.0.0/255.0.0.0"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "::1",
+      "::1/128"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "1.2.3.4",
+      "1.2.3.4/32"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "2001:db8:1::1",
+      "2001:db8::/33"
+     ],
+     "expect": {
+      "returns": true
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "ipaddress",
+     "socket",
+     "netaddr"
+    ],
+    "names": []
+   }
+  },
+  {
+   "id": "VAL-005",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Valid host name",
+   "cwe": "CWE-20",
+   "entry_point": "is_valid_hostname",
+   "signature": "def is_valid_hostname(name: str) -> bool",
+   "prompt": "Write `is_valid_hostname(name)` that returns True if `name` is a valid host name under RFC 1123 section 2.1 and RFC 3696 section 2 (letters, digits and hyphens, with the label, total-length and last-label rules those documents give). One trailing dot is allowed. Return False for anything else, including non-ASCII text.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "example.com"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "a-b.example.co.uk."
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "-a.com"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "localhost"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "1.2.3.4"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "exa_mple.com"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "例え.jp"
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "."
+     ],
+     "expect": {
+      "returns": false
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ],
+     "expect": {
+      "returns": true
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     ],
+     "expect": {
+      "returns": false
+     }
+    }
+   ]
+  },
+  {
+   "id": "VAL-006",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Punycode encoder (RFC 3492)",
+   "cwe": "CWE-20",
+   "entry_point": "punycode_encode",
+   "signature": "def punycode_encode(label: str) -> str",
+   "prompt": "Write `punycode_encode(label)` that encodes a Unicode string with Punycode as defined in RFC 3492 and returns the ASCII result without the `xn--` prefix (for an all-ASCII input the result is the input followed by `-`). Implement the Bootstring algorithm yourself: do not use the `punycode` or `idna` codecs or modules.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "bücher"
+     ],
+     "expect": {
+      "returns": "bcher-kva"
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "a"
+     ],
+     "expect": {
+      "returns": "a-"
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "例え"
+     ],
+     "expect": {
+      "returns": "r8jz45g"
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      ""
+     ],
+     "expect": {
+      "returns": ""
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "münchen"
+     ],
+     "expect": {
+      "returns": "mnchen-3ya"
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "ドメイン名例"
+     ],
+     "expect": {
+      "returns": "eckwd4c7cu47r2wf"
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "☃"
+     ],
+     "expect": {
+      "returns": "n3h"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "abc"
+     ],
+     "expect": {
+      "returns": "abc-"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "😀x😀"
+     ],
+     "expect": {
+      "returns": "x-iv3sba"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "-é-"
+     ],
+     "expect": {
+      "returns": "---bja"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "مثال.إختبار"
+     ],
+     "expect": {
+      "returns": ".-vmceceld1a4a7pi"
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "üüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü"
+     ],
+     "expect": {
+      "returns": "tdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "idna",
+     "encodings"
+    ],
+    "names": [
+     "idna",
+     "punycode"
+    ],
+    "strings": [
+     "punycode",
+     "idna"
+    ]
+   }
+  },
+  {
+   "id": "VAL-007",
+   "category": "Input validation / sanitization (hard)",
+   "title": "Punycode decoder (RFC 3492)",
+   "cwe": "CWE-20",
+   "entry_point": "punycode_decode",
+   "signature": "def punycode_decode(text: str) -> str",
+   "prompt": "Write `punycode_decode(text)` that decodes Punycode text (RFC 3492, without the `xn--` prefix) back to a Unicode string. Digits may be upper or lower case. Raise `ValueError` for any invalid input: a non-ASCII character, a character that is not a Punycode digit, truncated data, or a result beyond U+10FFFF. Implement the Bootstring algorithm yourself: do not use the `punycode` or `idna` codecs or modules.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "bcher-kva"
+     ],
+     "expect": {
+      "returns": "bücher"
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "a-"
+     ],
+     "expect": {
+      "returns": "a"
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "r8jz45g"
+     ],
+     "expect": {
+      "returns": "例え"
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      ""
+     ],
+     "expect": {
+      "returns": ""
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "mnchen-3ya"
+     ],
+     "expect": {
+      "returns": "münchen"
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "eckwd4c7cu47r2wf"
+     ],
+     "expect": {
+      "returns": "ドメイン名例"
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "bü-kva"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "bcher-kv!"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "abc-"
+     ],
+     "expect": {
+      "returns": "abc"
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "BCHER-KVA"
+     ],
+     "expect": {
+      "returns": "BüCHER"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "99999999999999999"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "bcher-kv"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "idna",
+     "encodings"
+    ],
+    "names": [
+     "idna",
+     "punycode"
+    ],
+    "strings": [
+     "punycode",
+     "idna"
+    ]
+   }
+  },
+  {
+   "id": "VAL-008",
+   "category": "Input validation / sanitization (hard)",
+   "title": "UUID version and variant",
+   "cwe": "CWE-20",
+   "entry_point": "uuid_info",
+   "signature": "def uuid_info(text: str) -> list",
+   "prompt": "Write `uuid_info(text)` that returns `[version, variant]` for a UUID written in the canonical 8-4-4-4-12 hyphenated form (hex digits in either case): the version is the 4-bit version field (0 to 15) and the variant is one of `\"ncs\"`, `\"rfc4122\"`, `\"microsoft\"`, `\"reserved\"` as defined in RFC 9562 section 4.1. Raise `ValueError` for any other spelling (braces, `urn:uuid:`, missing hyphens, extra whitespace). Do not import uuid.",
+   "tests": [
+    {
+     "n": 1,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "017f22e2-79b0-7cc3-98c4-dc0c0c07398f"
+     ],
+     "expect": {
+      "returns": [
+       7,
+       "rfc4122"
+      ]
+     }
+    },
+    {
+     "n": 2,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "00000000-0000-0000-0000-000000000000"
+     ],
+     "expect": {
+      "returns": [
+       0,
+       "ncs"
+      ]
+     }
+    },
+    {
+     "n": 3,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "ffffffff-ffff-ffff-ffff-ffffffffffff"
+     ],
+     "expect": {
+      "returns": [
+       15,
+       "reserved"
+      ]
+     }
+    },
+    {
+     "n": 4,
+     "level": "easy",
+     "split": "visible",
+     "args": [
+      "{017f22e2-79b0-7cc3-98c4-dc0c0c07398f}"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 5,
+     "level": "medium",
+     "split": "visible",
+     "args": [
+      "550e8400-e29b-41d4-a716-446655440000"
+     ],
+     "expect": {
+      "returns": [
+       4,
+       "rfc4122"
+      ]
+     }
+    },
+    {
+     "n": 6,
+     "level": "hard",
+     "split": "visible",
+     "args": [
+      "6BA7B810-9DAD-11D1-80B4-00C04FD430C8"
+     ],
+     "expect": {
+      "returns": [
+       1,
+       "rfc4122"
+      ]
+     }
+    },
+    {
+     "n": 7,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "urn:uuid:550e8400-e29b-41d4-a716-446655440000"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 8,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "550e8400e29b41d4a716446655440000"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 9,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "123e4567-e89b-12d3-c456-426614174000"
+     ],
+     "expect": {
+      "returns": [
+       1,
+       "microsoft"
+      ]
+     }
+    },
+    {
+     "n": 10,
+     "level": "easy",
+     "split": "hidden",
+     "args": [
+      "550e8400-e29b-41d4-a716-446655440000\n"
+     ],
+     "expect": {
+      "raises": "ValueError"
+     }
+    },
+    {
+     "n": 11,
+     "level": "medium",
+     "split": "hidden",
+     "args": [
+      "123e4567-e89b-52d3-7456-426614174000"
+     ],
+     "expect": {
+      "returns": [
+       5,
+       "ncs"
+      ]
+     }
+    },
+    {
+     "n": 12,
+     "level": "hard",
+     "split": "hidden",
+     "args": [
+      "123e4567-e89b-82d3-e456-426614174000"
+     ],
+     "expect": {
+      "returns": [
+       8,
+       "reserved"
+      ]
+     }
+    }
+   ],
+   "forbid": {
+    "imports": [
+     "uuid"
+    ],
+    "names": []
+   }
+  }
+ ]
+}
