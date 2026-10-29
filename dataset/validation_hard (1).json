@@ -1,0 +1,4986 @@
+{
+  "dataset": "SAFE-Loop Input validation / sanitization set (hard) v0.2",
+  "category": "Input validation / sanitization (hard)",
+  "task_count": 30,
+  "test_layout": "12 tests per task; tests 1-6 = visible pool, tests 7-12 = fixed hidden set; every test is labelled hard; visible tests are not shown when runner uses k=0.",
+  "test_format": {
+    "args": "positional arguments",
+    "expect": "{'returns': value} | {'raises': 'ValueError'}"
+  },
+  "notes": "Built from the supplied validation_hard file: original VAL-001..008 are preserved, with their test levels normalized to hard, and VAL-009..030 add 22 standards-oriented validation tasks. Every task has 12 positional-argument tests with returns/ValueError expectations, no reference_solution field, and 6 visible-pool plus 6 hidden tests. The generated JSON and schema have been checked. New test expectations come from local deterministic reference implementations and were spot-checked against standard library behavior; not every task has yet received a full separate implementation cross-check or typical-mistake test. No target model run has been performed, so a first-attempt pass rate below 50% is not guaranteed and must be measured empirically.",
+  "tasks": [
+    {
+      "id": "VAL-001",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Resolve a relative URI (RFC 3986 section 5)",
+      "cwe": "CWE-20",
+      "entry_point": "resolve_uri",
+      "signature": "def resolve_uri(base: str, ref: str) -> str",
+      "prompt": "Write `resolve_uri(base, ref)` that resolves the URI reference `ref` against the absolute URI `base` exactly as RFC 3986 section 5 specifies (strict parser, no backward-compatibility exceptions), and returns the resulting URI. Raise `ValueError` if `base` has no scheme. Do not import urllib.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "g"
+          ],
+          "expect": {
+            "returns": "http://a/b/c/g"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "../../../g"
+          ],
+          "expect": {
+            "returns": "http://a/g"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "g;x=1/../y"
+          ],
+          "expect": {
+            "returns": "http://a/b/c/y"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "g?y/./x"
+          ],
+          "expect": {
+            "returns": "http://a/b/c/g?y/./x"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "http:g"
+          ],
+          "expect": {
+            "returns": "http:g"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "http://a/b/c/d;p?q",
+            ""
+          ],
+          "expect": {
+            "returns": "http://a/b/c/d;p?q"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "#s"
+          ],
+          "expect": {
+            "returns": "http://a/b/c/d;p?q#s"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "a/b/c",
+            "g"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "../.."
+          ],
+          "expect": {
+            "returns": "http://a/"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "//g"
+          ],
+          "expect": {
+            "returns": "http://g"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://a/b/c/d;p?q",
+            "./g/."
+          ],
+          "expect": {
+            "returns": "http://a/b/c/g/"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://a",
+            "g"
+          ],
+          "expect": {
+            "returns": "http://a/g"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "urlparse",
+          "yarl",
+          "furl",
+          "hyperlink"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-002",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict IPv4 address",
+      "cwe": "CWE-20",
+      "entry_point": "parse_ipv4",
+      "signature": "def parse_ipv4(text: str) -> str",
+      "prompt": "Write `parse_ipv4(text)` that parses an IPv4 address written as four decimal numbers separated by dots, using the `IPv4address` rule of RFC 3986 (the `dec-octet` grammar), and returns the 4 bytes as lower-case hex. Raise `ValueError` for anything that does not match that grammar exactly. Do not import ipaddress or socket.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "192.168.0.1"
+          ],
+          "expect": {
+            "returns": "c0a80001"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "255.255.255.255"
+          ],
+          "expect": {
+            "returns": "ffffffff"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "256.0.0.1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0.0.0.0"
+          ],
+          "expect": {
+            "returns": "00000000"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "01.2.3.4"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "127.1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.2.3.4\n"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0x7f.0.0.1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.2.3.04"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u0663.\u0663.\u0663.\u0663"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            " 1.2.3.4"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.2.3.4.5"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "ipaddress",
+          "socket",
+          "netaddr"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-003",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict IPv6 address",
+      "cwe": "CWE-20",
+      "entry_point": "parse_ipv6",
+      "signature": "def parse_ipv6(text: str) -> str",
+      "prompt": "Write `parse_ipv6(text)` that parses an IPv6 address in the text forms of RFC 4291 section 2.2 (full, with `::` compression, and with a trailing dotted IPv4 part) and returns the 16 bytes as lower-case hex. Hex digits may be in either case. Raise `ValueError` for anything else, including zone identifiers such as `%eth0`, prefix lengths, and any IPv4 part that is not a strict RFC 3986 `IPv4address`. Do not import ipaddress or socket.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "::"
+          ],
+          "expect": {
+            "returns": "00000000000000000000000000000000"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2001:db8::ff00:42:8329"
+          ],
+          "expect": {
+            "returns": "20010db8000000000000ff0000428329"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "::ffff:192.0.2.128"
+          ],
+          "expect": {
+            "returns": "00000000000000000000ffffc0000280"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1:2:3:4:5:6:7:8"
+          ],
+          "expect": {
+            "returns": "00010002000300040005000600070008"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1::2::3"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "fe80::1%eth0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "12345::"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1:2:3:4:5:6:7"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "::1.2.3"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "::01.2.3.4"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1:2:3:4:5:6:1.2.3.4"
+          ],
+          "expect": {
+            "returns": "00010002000300040005000601020304"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2001:DB8:0:0:0:0:0:1"
+          ],
+          "expect": {
+            "returns": "20010db8000000000000000000000001"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "ipaddress",
+          "socket",
+          "netaddr"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-004",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Is this IP address inside this CIDR block?",
+      "cwe": "CWE-20",
+      "entry_point": "ip_in_cidr",
+      "signature": "def ip_in_cidr(ip: str, cidr: str) -> bool",
+      "prompt": "Write `ip_in_cidr(ip, cidr)` that returns True if the IPv4 or IPv6 address `ip` lies inside the network `cidr` written as `address/prefix-length`. Both parts must be strictly valid (the prefix is decimal digits only, no leading zeros, within the address size, and the network address must have no host bits set), otherwise raise `ValueError`. An IPv4 address is never inside an IPv6 network or the other way round (return False, including IPv4-mapped IPv6 forms). Do not import ipaddress or socket.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "10.1.2.3",
+            "10.0.0.0/8"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "192.168.2.5",
+            "192.168.1.0/24"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "::ffff:10.0.0.1",
+            "10.0.0.0/8"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "10.0.0.1",
+            "10.0.0.1/0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2001:db8::1",
+            "2001:db8::/32"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.2.3.4",
+            "0.0.0.0/0"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "10.0.0.0",
+            "10.0.0.0/33"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "10.0.0.0",
+            "10.0.0.0/08"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "10.0.0.0",
+            "10.0.0.0/255.0.0.0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "::1",
+            "::1/128"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.2.3.4",
+            "1.2.3.4/32"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2001:db8:1::1",
+            "2001:db8::/33"
+          ],
+          "expect": {
+            "returns": true
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "ipaddress",
+          "socket",
+          "netaddr"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-005",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Valid host name",
+      "cwe": "CWE-20",
+      "entry_point": "is_valid_hostname",
+      "signature": "def is_valid_hostname(name: str) -> bool",
+      "prompt": "Write `is_valid_hostname(name)` that returns True if `name` is a valid host name under RFC 1123 section 2.1 and RFC 3696 section 2 (letters, digits and hyphens, with the label, total-length and last-label rules those documents give). One trailing dot is allowed. Return False for anything else, including non-ASCII text.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "example.com"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a-b.example.co.uk."
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-a.com"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "localhost"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.2.3.4"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "exa_mple.com"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u4f8b\u3048.jp"
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "."
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "expect": {
+            "returns": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "VAL-006",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Punycode encoder (RFC 3492)",
+      "cwe": "CWE-20",
+      "entry_point": "punycode_encode",
+      "signature": "def punycode_encode(label: str) -> str",
+      "prompt": "Write `punycode_encode(label)` that encodes a Unicode string with Punycode as defined in RFC 3492 and returns the ASCII result without the `xn--` prefix (for an all-ASCII input the result is the input followed by `-`). Implement the Bootstring algorithm yourself: do not use the `punycode` or `idna` codecs or modules.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "b\u00fccher"
+          ],
+          "expect": {
+            "returns": "bcher-kva"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a"
+          ],
+          "expect": {
+            "returns": "a-"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "\u4f8b\u3048"
+          ],
+          "expect": {
+            "returns": "r8jz45g"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "m\u00fcnchen"
+          ],
+          "expect": {
+            "returns": "mnchen-3ya"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "\u30c9\u30e1\u30a4\u30f3\u540d\u4f8b"
+          ],
+          "expect": {
+            "returns": "eckwd4c7cu47r2wf"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u2603"
+          ],
+          "expect": {
+            "returns": "n3h"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "abc"
+          ],
+          "expect": {
+            "returns": "abc-"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\ud83d\ude00x\ud83d\ude00"
+          ],
+          "expect": {
+            "returns": "x-iv3sba"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-\u00e9-"
+          ],
+          "expect": {
+            "returns": "---bja"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u0645\u062b\u0627\u0644.\u0625\u062e\u062a\u0628\u0627\u0631"
+          ],
+          "expect": {
+            "returns": ".-vmceceld1a4a7pi"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc\u00fc"
+          ],
+          "expect": {
+            "returns": "tdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "idna",
+          "encodings"
+        ],
+        "names": [
+          "idna",
+          "punycode"
+        ],
+        "strings": [
+          "punycode",
+          "idna"
+        ]
+      }
+    },
+    {
+      "id": "VAL-007",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Punycode decoder (RFC 3492)",
+      "cwe": "CWE-20",
+      "entry_point": "punycode_decode",
+      "signature": "def punycode_decode(text: str) -> str",
+      "prompt": "Write `punycode_decode(text)` that decodes Punycode text (RFC 3492, without the `xn--` prefix) back to a Unicode string. Digits may be upper or lower case. Raise `ValueError` for any invalid input: a non-ASCII character, a character that is not a Punycode digit, truncated data, or a result beyond U+10FFFF. Implement the Bootstring algorithm yourself: do not use the `punycode` or `idna` codecs or modules.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bcher-kva"
+          ],
+          "expect": {
+            "returns": "b\u00fccher"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a-"
+          ],
+          "expect": {
+            "returns": "a"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "r8jz45g"
+          ],
+          "expect": {
+            "returns": "\u4f8b\u3048"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "mnchen-3ya"
+          ],
+          "expect": {
+            "returns": "m\u00fcnchen"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eckwd4c7cu47r2wf"
+          ],
+          "expect": {
+            "returns": "\u30c9\u30e1\u30a4\u30f3\u540d\u4f8b"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "b\u00fc-kva"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bcher-kv!"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "abc-"
+          ],
+          "expect": {
+            "returns": "abc"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "BCHER-KVA"
+          ],
+          "expect": {
+            "returns": "B\u00fcCHER"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "99999999999999999"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bcher-kv"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "idna",
+          "encodings"
+        ],
+        "names": [
+          "idna",
+          "punycode"
+        ],
+        "strings": [
+          "punycode",
+          "idna"
+        ]
+      }
+    },
+    {
+      "id": "VAL-008",
+      "category": "Input validation / sanitization (hard)",
+      "title": "UUID version and variant",
+      "cwe": "CWE-20",
+      "entry_point": "uuid_info",
+      "signature": "def uuid_info(text: str) -> list",
+      "prompt": "Write `uuid_info(text)` that returns `[version, variant]` for a UUID written in the canonical 8-4-4-4-12 hyphenated form (hex digits in either case): the version is the 4-bit version field (0 to 15) and the variant is one of `\"ncs\"`, `\"rfc4122\"`, `\"microsoft\"`, `\"reserved\"` as defined in RFC 9562 section 4.1. Raise `ValueError` for any other spelling (braces, `urn:uuid:`, missing hyphens, extra whitespace). Do not import uuid.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "017f22e2-79b0-7cc3-98c4-dc0c0c07398f"
+          ],
+          "expect": {
+            "returns": [
+              7,
+              "rfc4122"
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00000000-0000-0000-0000-000000000000"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "ncs"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ffffffff-ffff-ffff-ffff-ffffffffffff"
+          ],
+          "expect": {
+            "returns": [
+              15,
+              "reserved"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{017f22e2-79b0-7cc3-98c4-dc0c0c07398f}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "550e8400-e29b-41d4-a716-446655440000"
+          ],
+          "expect": {
+            "returns": [
+              4,
+              "rfc4122"
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "6BA7B810-9DAD-11D1-80B4-00C04FD430C8"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "rfc4122"
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "urn:uuid:550e8400-e29b-41d4-a716-446655440000"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "550e8400e29b41d4a716446655440000"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "123e4567-e89b-12d3-c456-426614174000"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "microsoft"
+            ]
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "550e8400-e29b-41d4-a716-446655440000\n"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "123e4567-e89b-52d3-7456-426614174000"
+          ],
+          "expect": {
+            "returns": [
+              5,
+              "ncs"
+            ]
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "123e4567-e89b-82d3-e456-426614174000"
+          ],
+          "expect": {
+            "returns": [
+              8,
+              "reserved"
+            ]
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "uuid"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-009",
+      "category": "Input validation / sanitization (hard)",
+      "title": "RFC 3339 timestamp validation and UTC normalization",
+      "cwe": "CWE-20",
+      "entry_point": "parse_rfc3339",
+      "signature": "def parse_rfc3339(text: str) -> dict",
+      "prompt": "Implement the timestamp profile in RFC 3339 and return its Unix microseconds, original UTC offset in minutes, and canonical UTC timestamp. Raise ValueError for invalid input.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2000-02-29T23:59:59Z"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 951868799000000,
+              "offset_minutes": 0,
+              "utc": "2000-02-29T23:59:59Z"
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2000-03-01T00:30:00+01:00"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 951867000000000,
+              "offset_minutes": 60,
+              "utc": "2000-02-29T23:30:00Z"
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2024-02-29T12:34:56.1200Z"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 1709210096120000,
+              "offset_minutes": 0,
+              "utc": "2024-02-29T12:34:56.12Z"
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1970-01-01T00:00:00+00:00"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 0,
+              "offset_minutes": 0,
+              "utc": "1970-01-01T00:00:00Z"
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2023-12-31T23:00:00-02:00"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 1704070800000000,
+              "offset_minutes": -120,
+              "utc": "2024-01-01T01:00:00Z"
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2024-01-01T00:00:00.000001Z"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 1704067200000001,
+              "offset_minutes": 0,
+              "utc": "2024-01-01T00:00:00.000001Z"
+            }
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2023-02-29T00:00:00Z"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2024-01-01t00:00:00z"
+          ],
+          "expect": {
+            "returns": {
+              "unix_us": 1704067200000000,
+              "offset_minutes": 0,
+              "utc": "2024-01-01T00:00:00Z"
+            }
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2024-01-01T24:00:00Z"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2024-01-01T00:00:60Z"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2024-01-01T00:00:00+24:00"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0000-01-01T00:00:00Z"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "dateutil",
+          "arrow",
+          "pendulum"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-010",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Semantic Versioning precedence comparator",
+      "cwe": "CWE-20",
+      "entry_point": "compare_semver",
+      "signature": "def compare_semver(a: str, b: str) -> int",
+      "prompt": "Compare versions under Semantic Versioning 2.0.0. Return -1, 0, or 1 according to precedence; raise ValueError for malformed versions.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.0.0-alpha",
+            "1.0.0-alpha.1"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.0.0-alpha.2",
+            "1.0.0-alpha.10"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.0.0-rc.1",
+            "1.0.0"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "2.0.0+build.8",
+            "2.0.0+build.9"
+          ],
+          "expect": {
+            "returns": 0
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.0.0-1",
+            "1.0.0-alpha"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.0.0-alpha.beta",
+            "1.0.0-beta"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "01.0.0",
+            "1.0.0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.0",
+            "1.0.0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.0.0-01",
+            "1.0.0-1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.0.0+",
+            "1.0.0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.0.0-a..b",
+            "1.0.0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.0.0-A",
+            "1.0.0-a"
+          ],
+          "expect": {
+            "returns": -1
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "semver",
+          "packaging"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-011",
+      "category": "Input validation / sanitization (hard)",
+      "title": "IBAN normalization and MOD-97 validation",
+      "cwe": "CWE-20",
+      "entry_point": "normalize_iban",
+      "signature": "def normalize_iban(text: str) -> str",
+      "prompt": "Validate and normalize an International Bank Account Number according to ISO 13616. Return its uppercase form without visual ASCII spaces; raise ValueError if invalid.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "GB82 WEST 1234 5698 7654 32"
+          ],
+          "expect": {
+            "returns": "GB82WEST12345698765432"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "DE89370400440532013000"
+          ],
+          "expect": {
+            "returns": "DE89370400440532013000"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "FR1420041010050500013M02606"
+          ],
+          "expect": {
+            "returns": "FR1420041010050500013M02606"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "NL91 ABNA 0417 1643 00"
+          ],
+          "expect": {
+            "returns": "NL91ABNA0417164300"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ES9121000418450200051332"
+          ],
+          "expect": {
+            "returns": "ES9121000418450200051332"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "NO9386011117947"
+          ],
+          "expect": {
+            "returns": "NO9386011117947"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GB82WEST12345698765433"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GB82WEST1234569876543"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "gb82 west 1234 5698 7654 32"
+          ],
+          "expect": {
+            "returns": "GB82WEST12345698765432"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GB82\tWEST12345698765432"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ZZ821234567890123456789012"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GB00WEST12345698765432"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "stdnum",
+          "schwifty",
+          "iban",
+          "ibans"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-012",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict UTF-8 decoding from hexadecimal bytes",
+      "cwe": "CWE-20",
+      "entry_point": "decode_utf8_hex",
+      "signature": "def decode_utf8_hex(data_hex: str) -> str",
+      "prompt": "Decode the supplied byte sequence as strict UTF-8 per RFC 3629. Raise ValueError for malformed hex, overlong encodings, surrogate code points, out-of-range values, and truncated sequences.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "e29883"
+          ],
+          "expect": {
+            "returns": "\u2603"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "f09f9880"
+          ],
+          "expect": {
+            "returns": "\ud83d\ude00"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "c3a9"
+          ],
+          "expect": {
+            "returns": "\u00e9"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0041"
+          ],
+          "expect": {
+            "returns": "\u0000A"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "efbbbf41"
+          ],
+          "expect": {
+            "returns": "\ufeffA"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "gg"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "c0af"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eda080"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "f4908080"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "e282"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "ftfy"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-013",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Canonical unpadded Base64url decoder",
+      "cwe": "CWE-20",
+      "entry_point": "decode_base64url",
+      "signature": "def decode_base64url(text: str) -> str",
+      "prompt": "Decode the URL-safe Base64 representation in RFC 4648 and return bytes as lowercase hex. Accept the canonical unpadded form only; raise ValueError otherwise.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Zg"
+          ],
+          "expect": {
+            "returns": "66"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Zm8"
+          ],
+          "expect": {
+            "returns": "666f"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Zm9v"
+          ],
+          "expect": {
+            "returns": "666f6f"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "AAECAwQ"
+          ],
+          "expect": {
+            "returns": "0001020304"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "SGVsbG8"
+          ],
+          "expect": {
+            "returns": "48656c6c6f"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "8J-YgA"
+          ],
+          "expect": {
+            "returns": "f09f9880"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Zg=="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Zg="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Zh"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Zm9v+"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "A"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "base64url",
+          "pybase64"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-014",
+      "category": "Input validation / sanitization (hard)",
+      "title": "JSON Pointer token decoding",
+      "cwe": "CWE-20",
+      "entry_point": "decode_json_pointer",
+      "signature": "def decode_json_pointer(pointer: str) -> list",
+      "prompt": "Decode the reference tokens of a JSON Pointer (RFC 6901). Return the token list and reject invalid escape sequences or invalid pointer syntax with ValueError.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": []
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "/"
+          ],
+          "expect": {
+            "returns": [
+              ""
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "/a/b"
+          ],
+          "expect": {
+            "returns": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "/a~1b/c~0d"
+          ],
+          "expect": {
+            "returns": [
+              "a/b",
+              "c~d"
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "/~01"
+          ],
+          "expect": {
+            "returns": [
+              "~1"
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "/a//b"
+          ],
+          "expect": {
+            "returns": [
+              "a",
+              "",
+              "b"
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "a/b"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "/~"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "/~2"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "/x~10"
+          ],
+          "expect": {
+            "returns": [
+              "x/0"
+            ]
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "//~0~1"
+          ],
+          "expect": {
+            "returns": [
+              "",
+              "~/"
+            ]
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "/a~00~11"
+          ],
+          "expect": {
+            "returns": [
+              "a~0/1"
+            ]
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "jsonpointer",
+          "jsonpath_ng"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-015",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict form-urlencoded query parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_form_query",
+      "signature": "def parse_form_query(query: str) -> list",
+      "prompt": "Parse an application/x-www-form-urlencoded query into ordered key/value pairs. Preserve duplicate and empty fields; decode percent escapes as UTF-8 and interpret plus signs as spaces. Raise ValueError on invalid escapes or UTF-8.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a=1&b=2"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "a",
+                "1"
+              ],
+              [
+                "b",
+                "2"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a=1&a=2&a=1"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "a",
+                "1"
+              ],
+              [
+                "a",
+                "2"
+              ],
+              [
+                "a",
+                "1"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "name=J%C3%B6rg"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "name",
+                "J\u00f6rg"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "q=a+b%2Bc"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "q",
+                "a b+c"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "a",
+                ""
+              ]
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=x&y="
+          ],
+          "expect": {
+            "returns": [
+              [
+                "",
+                "x"
+              ],
+              [
+                "y",
+                ""
+              ]
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": []
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "a=%"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "a=%C3%28"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "a=1&&b=2"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "a",
+                "1"
+              ],
+              [
+                "",
+                ""
+              ],
+              [
+                "b",
+                "2"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x=%00"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "x",
+                "\u0000"
+              ]
+            ]
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x=%F0%9F%98%80"
+          ],
+          "expect": {
+            "returns": [
+              [
+                "x",
+                "\ud83d\ude00"
+              ]
+            ]
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "werkzeug",
+          "requests"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-016",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict JSON Lines stream parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_jsonl",
+      "signature": "def parse_jsonl(stream: str) -> list",
+      "prompt": "Parse a newline-delimited JSON stream. Return records in order; reject blank records, malformed JSON, duplicate object keys, non-standard constants, and bare carriage returns.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"a\":1}\n{\"b\":[true,null]}\n"
+          ],
+          "expect": {
+            "returns": [
+              {
+                "a": 1
+              },
+              {
+                "b": [
+                  true,
+                  null
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[1,2]\r\n\"x\""
+          ],
+          "expect": {
+            "returns": [
+              [
+                1,
+                2
+              ],
+              "x"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0\nfalse\nnull"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              false,
+              null
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": []
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"x\":1,\"x\":2}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"x\":NaN}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\n{}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{}\n\n{}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{bad}\n"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{}\r"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\"unterminated"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"n\":1.0}\n"
+          ],
+          "expect": {
+            "returns": [
+              {
+                "n": 1.0
+              }
+            ]
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "ijson",
+          "orjson",
+          "ujson"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-017",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict RFC 8259 JSON number parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_json_number",
+      "signature": "def parse_json_number(text: str) -> list",
+      "prompt": "Validate a JSON number under RFC 8259 and return [sign_bit, coefficient_digits, decimal_exponent] without rounding. Raise ValueError for non-number tokens.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "0",
+              0
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-0"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "0",
+              0
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1.2300"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "12300",
+              -4
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1e+09"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "1",
+              9
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-12.5E-2"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "125",
+              -3
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "123456789012345678901234567890"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "123456789012345678901234567890",
+              0
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "+1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "01"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1."
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            ".1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "NaN"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1e"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "simplejson"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-018",
+      "category": "Input validation / sanitization (hard)",
+      "title": "XML 1.0 text escaping and character validation",
+      "cwe": "CWE-20",
+      "entry_point": "escape_xml_text",
+      "signature": "def escape_xml_text(text: str) -> str",
+      "prompt": "Escape XML text content under the XML 1.0 character rules. Reject characters that cannot appear in an XML 1.0 document with ValueError.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a&b<c>d"
+          ],
+          "expect": {
+            "returns": "a&amp;b&lt;c&gt;d"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "\"quote\" and apostrophe"
+          ],
+          "expect": {
+            "returns": "\"quote\" and apostrophe"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "\tline\nnext\r"
+          ],
+          "expect": {
+            "returns": "\tline\nnext\r"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "snowman \u2603"
+          ],
+          "expect": {
+            "returns": "snowman \u2603"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "supplementary \ud834\udd1e"
+          ],
+          "expect": {
+            "returns": "supplementary \ud834\udd1e"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x\u0000y"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x\u0001y"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\ud800"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\ufffe"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "]]>"
+          ],
+          "expect": {
+            "returns": "]]&gt;"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "expect": {
+            "returns": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "defusedxml",
+          "lxml",
+          "xmltodict"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-019",
+      "category": "Input validation / sanitization (hard)",
+      "title": "RFC 3986 URI path-segment encoder",
+      "cwe": "CWE-20",
+      "entry_point": "encode_uri_segment",
+      "signature": "def encode_uri_segment(segment: str) -> str",
+      "prompt": "Percent-encode a single UTF-8 URI path segment using RFC 3986 unreserved characters. Do not treat plus as a space; emit uppercase hexadecimal escapes.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a b"
+          ],
+          "expect": {
+            "returns": "a%20b"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a/b"
+          ],
+          "expect": {
+            "returns": "a%2Fb"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "~._-"
+          ],
+          "expect": {
+            "returns": "~._-"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "caf\u00e9"
+          ],
+          "expect": {
+            "returns": "caf%C3%A9"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "%2F"
+          ],
+          "expect": {
+            "returns": "%252F"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "100%"
+          ],
+          "expect": {
+            "returns": "100%25"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x?y#z"
+          ],
+          "expect": {
+            "returns": "x%3Fy%23z"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u00e9/\u2603"
+          ],
+          "expect": {
+            "returns": "%C3%A9%2F%E2%98%83"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\u0000"
+          ],
+          "expect": {
+            "returns": "%00"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "\ud800"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "expect": {
+            "returns": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "yarl",
+          "furl"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-020",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict media type and parameter parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_content_type",
+      "signature": "def parse_content_type(value: str) -> dict",
+      "prompt": "Parse a MIME media type and its parameters as defined by HTTP field syntax. Return lowercase type/subtype and a parameter map; reject malformed quoting and duplicate parameter names.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "application/json"
+          ],
+          "expect": {
+            "returns": {
+              "type": "application",
+              "subtype": "json",
+              "params": {}
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Text/Plain; charset=utf-8"
+          ],
+          "expect": {
+            "returns": {
+              "type": "text",
+              "subtype": "plain",
+              "params": {
+                "charset": "utf-8"
+              }
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "multipart/form-data; boundary=\"abc;def\""
+          ],
+          "expect": {
+            "returns": {
+              "type": "multipart",
+              "subtype": "form-data",
+              "params": {
+                "boundary": "abc;def"
+              }
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "application/example; x=\"a\\\"b\""
+          ],
+          "expect": {
+            "returns": {
+              "type": "application",
+              "subtype": "example",
+              "params": {
+                "x": "a\"b"
+              }
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "text/html; charset=UTF-8; level=1"
+          ],
+          "expect": {
+            "returns": {
+              "type": "text",
+              "subtype": "html",
+              "params": {
+                "charset": "UTF-8",
+                "level": "1"
+              }
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "application/json; charset=utf-8; CHARSET=ascii"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "text/plain;"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "text/plain; charset="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "text /plain"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "*/json"
+          ],
+          "expect": {
+            "returns": {
+              "type": "*",
+              "subtype": "json",
+              "params": {}
+            }
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "text/plain; x=\"unterminated"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "text/plain; x=a b"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "email",
+          "mimeparse"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-021",
+      "category": "Input validation / sanitization (hard)",
+      "title": "HTTP Content-Range validator",
+      "cwe": "CWE-20",
+      "entry_point": "parse_content_range",
+      "signature": "def parse_content_range(value: str) -> list",
+      "prompt": "Parse an HTTP Content-Range value using the byte-range grammar. Return [unit, start, end, complete_length], using null fields for an unsatisfied range. Raise ValueError for invalid ranges.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bytes 0-99/100"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              0,
+              99,
+              100
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Bytes 10-19/100"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              10,
+              19,
+              100
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bytes 0-0/*"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              0,
+              0,
+              null
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bytes */123"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              null,
+              null,
+              123
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bytes 20-19/100"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "bytes 0-100/100"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bytes 0-0/0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bytes */0"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              null,
+              null,
+              0
+            ]
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bytes 01-02/10"
+          ],
+          "expect": {
+            "returns": [
+              "bytes",
+              1,
+              2,
+              10
+            ]
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "items 2-3/10"
+          ],
+          "expect": {
+            "returns": [
+              "items",
+              2,
+              3,
+              10
+            ]
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bytes -1/10"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bytes 0-1/10 extra"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "httpx",
+          "requests"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-022",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict IMF-fixdate parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_imf_date",
+      "signature": "def parse_imf_date(value: str) -> int",
+      "prompt": "Parse an IMF-fixdate HTTP date as defined by RFC 9110 and return its Unix timestamp in seconds. Reject obsolete date formats and weekday/date mismatches.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Sun, 06 Nov 1994 08:49:37 GMT"
+          ],
+          "expect": {
+            "returns": 784111777
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Wed, 21 Oct 2015 07:28:00 GMT"
+          ],
+          "expect": {
+            "returns": 1445412480
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Thu, 01 Jan 1970 00:00:00 GMT"
+          ],
+          "expect": {
+            "returns": 0
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Tue, 29 Feb 2000 12:00:00 GMT"
+          ],
+          "expect": {
+            "returns": 951825600
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Mon, 01 Jan 2024 00:00:00 GMT"
+          ],
+          "expect": {
+            "returns": 1704067200
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Sun, 31 Dec 2023 23:59:60 GMT"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Mon, 32 Jan 2024 00:00:00 GMT"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Sun, 06 Nov 1994 08:49:37 UTC"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Sunday, 06-Nov-94 08:49:37 GMT"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Sun, 06 Nov 1994 08:49:37 GMT "
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Sat, 06 Nov 1994 08:49:37 GMT"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Sun, 29 Feb 2023 00:00:00 GMT"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "email.utils",
+          "dateutil"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-023",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Retry-After value parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_retry_after",
+      "signature": "def parse_retry_after(value: str, now: int) -> dict",
+      "prompt": "Parse Retry-After according to HTTP semantics. Return either a delay-seconds record or an HTTP-date record with epoch and nonnegative delay; raise ValueError for invalid values.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0",
+            1700000000
+          ],
+          "expect": {
+            "returns": {
+              "kind": "delay",
+              "seconds": 0
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "120",
+            1700000000
+          ],
+          "expect": {
+            "returns": {
+              "kind": "delay",
+              "seconds": 120
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0005",
+            1700000000
+          ],
+          "expect": {
+            "returns": {
+              "kind": "delay",
+              "seconds": 5
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Wed, 21 Oct 2015 07:28:00 GMT",
+            1445410000
+          ],
+          "expect": {
+            "returns": {
+              "kind": "date",
+              "epoch": 1445412480,
+              "delay": 2480
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Sun, 06 Nov 1994 08:49:37 GMT",
+            784111777
+          ],
+          "expect": {
+            "returns": {
+              "kind": "date",
+              "epoch": 784111777,
+              "delay": 0
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-1",
+            1700000000
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "+1",
+            1700000000
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1.5",
+            1700000000
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Wed, 21 Oct 2015 07:28:00 UTC",
+            1445410000
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Mon, 01 Jan 2024 00:00:00 GMT",
+            1704067300
+          ],
+          "expect": {
+            "returns": {
+              "kind": "date",
+              "epoch": 1704067200,
+              "delay": 0
+            }
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "",
+            0
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "999999999999999999999999",
+            0
+          ],
+          "expect": {
+            "returns": {
+              "kind": "delay",
+              "seconds": 999999999999999999999999
+            }
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "email.utils",
+          "dateutil"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-024",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict URI authority host and port parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_authority",
+      "signature": "def parse_authority(authority: str) -> dict",
+      "prompt": "Parse a restricted RFC 3986 authority containing only a host and optional port (userinfo is not accepted). Return host, integer port or null, and host kind (name, ipv4, ipv6). Raise ValueError for invalid syntax.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "example.com"
+          ],
+          "expect": {
+            "returns": {
+              "host": "example.com",
+              "port": null,
+              "kind": "name"
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "EXAMPLE.com.:443"
+          ],
+          "expect": {
+            "returns": {
+              "host": "example.com.",
+              "port": 443,
+              "kind": "name"
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "127.0.0.1:8080"
+          ],
+          "expect": {
+            "returns": {
+              "host": "127.0.0.1",
+              "port": 8080,
+              "kind": "ipv4"
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[2001:db8::1]:443"
+          ],
+          "expect": {
+            "returns": {
+              "host": "2001:db8::1",
+              "port": 443,
+              "kind": "ipv6"
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[::1]"
+          ],
+          "expect": {
+            "returns": {
+              "host": "::1",
+              "port": null,
+              "kind": "ipv6"
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "localhost:0"
+          ],
+          "expect": {
+            "returns": {
+              "host": "localhost",
+              "port": 0,
+              "kind": "name"
+            }
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "example.com:65535"
+          ],
+          "expect": {
+            "returns": {
+              "host": "example.com",
+              "port": 65535,
+              "kind": "name"
+            }
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "example.com:65536"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "2001:db8::1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "user@example.com"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[fe80::1%25eth0]:80"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "01.2.3.4:80"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "yarl",
+          "furl"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-025",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Content-Disposition and RFC 5987 filename parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_content_disposition",
+      "signature": "def parse_content_disposition(value: str) -> dict",
+      "prompt": "Parse an HTTP Content-Disposition field, including extended filename parameters per RFC 6266 and RFC 5987. Return disposition, parameters, and the preferred filename; raise ValueError for malformed fields.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "attachment; filename=\"report.txt\""
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "filename": "report.txt"
+              },
+              "filename": "report.txt"
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "inline"
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "inline",
+              "params": {},
+              "filename": null
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "attachment; filename*=UTF-8''caf%C3%A9.txt"
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "filename*": "UTF-8''caf%C3%A9.txt"
+              },
+              "filename": "caf\u00e9.txt"
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "attachment; filename=\"old.txt\"; filename*=UTF-8''new%20name.txt"
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "filename": "old.txt",
+                "filename*": "UTF-8''new%20name.txt"
+              },
+              "filename": "new name.txt"
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "attachment; filename=\"a\\\"b.txt\""
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "filename": "a\"b.txt"
+              },
+              "filename": "a\"b.txt"
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "attachment; filename=x; FILENAME=y"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "attachment; filename*=UTF-8''bad%ZZ"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "attachment; filename*=X-UNKNOWN''abc"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "attachment; filename=\"unterminated"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "attachment; creation-date=\"today\""
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "creation-date": "today"
+              },
+              "filename": null
+            }
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "bad value; filename=x"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "attachment; filename*=UTF-8'en'caf%C3%A9"
+          ],
+          "expect": {
+            "returns": {
+              "disposition": "attachment",
+              "params": {
+                "filename*": "UTF-8'en'caf%C3%A9"
+              },
+              "filename": "caf\u00e9"
+            }
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "email",
+          "cgi"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-026",
+      "category": "Input validation / sanitization (hard)",
+      "title": "Strict quoted-printable body decoder",
+      "cwe": "CWE-20",
+      "entry_point": "decode_quoted_printable",
+      "signature": "def decode_quoted_printable(data_hex: str) -> str",
+      "prompt": "Decode a quoted-printable body according to RFC 2045 and return lowercase hex. Treat CRLF soft line breaks correctly; reject malformed escapes and illegal line endings.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "48656c6c6f3d3230776f726c643d3231"
+          ],
+          "expect": {
+            "returns": "48656c6c6f20776f726c6421"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "6361663d43333d4139"
+          ],
+          "expect": {
+            "returns": "636166c3a9"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "6162633d0d0a646566"
+          ],
+          "expect": {
+            "returns": "616263646566"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3d30303d4646"
+          ],
+          "expect": {
+            "returns": "00ff"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "6c696e650d0a6e657874"
+          ],
+          "expect": {
+            "returns": "6c696e650d0a6e657874"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            ""
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3d4730"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "6162633d30"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "610a62"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "747261696c20"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "62616401"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "666f6f3d0d58"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "quopri"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-027",
+      "category": "Input validation / sanitization (hard)",
+      "title": "BCP 47 language-tag canonicalizer",
+      "cwe": "CWE-20",
+      "entry_point": "canonical_language_tag",
+      "signature": "def canonical_language_tag(tag: str) -> str",
+      "prompt": "Validate a well-formed language tag using the subtag grammar of RFC 5646 and return canonical casing. Raise ValueError for malformed or duplicate variants/extensions.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "en-us"
+          ],
+          "expect": {
+            "returns": "en-US"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "zh-hant-tw"
+          ],
+          "expect": {
+            "returns": "zh-Hant-TW"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "de-CH-1901"
+          ],
+          "expect": {
+            "returns": "de-CH-1901"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "sl-rozaj-biske"
+          ],
+          "expect": {
+            "returns": "sl-rozaj-biske"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "en-a-aaa-x-private"
+          ],
+          "expect": {
+            "returns": "en-a-aaa-x-private"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "en-Latn-US-variant1"
+          ],
+          "expect": {
+            "returns": "en-Latn-US-variant1"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "en--US"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "en-a"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "en-a-aaa-a-bbb"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "en-rozaj-ROZAJ"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "x-private"
+          ],
+          "expect": {
+            "returns": "x-private"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "123-US"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "langcodes",
+          "language_tags",
+          "babel"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-028",
+      "category": "Input validation / sanitization (hard)",
+      "title": "RFC 2397 data URI parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_data_uri",
+      "signature": "def parse_data_uri(uri: str) -> list",
+      "prompt": "Parse a data URI as specified by RFC 2397. Return [media_type, parameters, payload_hex]; raise ValueError for malformed metadata, escapes, or Base64 data.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:,Hello%20World"
+          ],
+          "expect": {
+            "returns": [
+              "text/plain",
+              {
+                "charset": "US-ASCII"
+              },
+              "48656c6c6f20576f726c64"
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:text/plain;charset=UTF-8,hello"
+          ],
+          "expect": {
+            "returns": [
+              "text/plain",
+              {
+                "charset": "UTF-8"
+              },
+              "68656c6c6f"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:application/octet-stream;base64,AAEC/w=="
+          ],
+          "expect": {
+            "returns": [
+              "application/octet-stream",
+              {},
+              "000102ff"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:image/png;base64,"
+          ],
+          "expect": {
+            "returns": [
+              "image/png",
+              {},
+              ""
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:text/plain,\u00e9"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "data:text/plain,%FF"
+          ],
+          "expect": {
+            "returns": [
+              "text/plain",
+              {},
+              "ff"
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "data:;charset=US-ASCII,abc"
+          ],
+          "expect": {
+            "returns": [
+              "text/plain",
+              {
+                "charset": "US-ASCII"
+              },
+              "616263"
+            ]
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "data:application/json,%7B%22a%22%3A1%7D"
+          ],
+          "expect": {
+            "returns": [
+              "application/json",
+              {},
+              "7b2261223a317d"
+            ]
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "data:text/plain;base64,SGVsbG8="
+          ],
+          "expect": {
+            "returns": [
+              "text/plain",
+              {},
+              "48656c6c6f"
+            ]
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "data:text/plain;base64,SGVsbG8"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "data:text/plain,%"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "http://example.com/"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "requests"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-029",
+      "category": "Input validation / sanitization (hard)",
+      "title": "RFC 3986 IPvFuture literal parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_ipvfuture",
+      "signature": "def parse_ipvfuture(literal: str) -> list",
+      "prompt": "Parse the IP-literal IPvFuture syntax in RFC 3986. Return [numeric_version, address_text] and reject invalid brackets, versions, or address characters.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[v1.fe80::]"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "fe80::"
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[vF.a:b:c]"
+          ],
+          "expect": {
+            "returns": [
+              15,
+              "a:b:c"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[v01.example]"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "example"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[v0.a]"
+          ],
+          "expect": {
+            "returns": [
+              0,
+              "a"
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "[V1.alpha-._~]"
+          ],
+          "expect": {
+            "returns": [
+              1,
+              "alpha-._~"
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "v1.alpha"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v.alpha]"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v1.]"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v1.a%20b]"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v1.a b]"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v123456789abcdef.a]"
+          ],
+          "expect": {
+            "returns": [
+              81985529216486895,
+              "a"
+            ]
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "[v1.a]]"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "urllib",
+          "yarl"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "VAL-030",
+      "category": "Input validation / sanitization (hard)",
+      "title": "RFC 2047 MIME encoded-word decoder",
+      "cwe": "CWE-20",
+      "entry_point": "decode_mime_words",
+      "signature": "def decode_mime_words(header: str) -> str",
+      "prompt": "Decode RFC 2047 encoded words in a header value using Base64 or Q encoding. Support UTF-8, US-ASCII, and ISO-8859-1; reject malformed encoded words or invalid byte sequences.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=?UTF-8?B?4pyT?="
+          ],
+          "expect": {
+            "returns": "\u2713"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=?UTF-8?Q?caf=C3=A9?="
+          ],
+          "expect": {
+            "returns": "caf\u00e9"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "plain text"
+          ],
+          "expect": {
+            "returns": "plain text"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=?ISO-8859-1?Q?Andr=E9?="
+          ],
+          "expect": {
+            "returns": "Andr\u00e9"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=?UTF-8?Q?Hello?= =?UTF-8?Q?_world?="
+          ],
+          "expect": {
+            "returns": "Hello world"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "=?US-ASCII?B?SGVsbG8=?="
+          ],
+          "expect": {
+            "returns": "Hello"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?UTF-8?B?4pyT?= (ok)"
+          ],
+          "expect": {
+            "returns": "\u2713 (ok)"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?UTF-8?B?abc?="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?UTF-8?Q?bad=G0?="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?NO-SUCH-CHARSET?Q?x?="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?UTF-8?Q?unterminated"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "=?UTF-8?Q?space here?="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "email",
+          "mailbox"
+        ],
+        "names": []
+      }
+    }
+  ]
+}

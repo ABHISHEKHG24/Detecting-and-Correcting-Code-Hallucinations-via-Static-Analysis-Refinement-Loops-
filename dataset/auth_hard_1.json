@@ -1,0 +1,4095 @@
+{
+  "dataset": "SAFE-Loop Authentication and secrets set (hard) v0.2",
+  "category": "Authentication and secrets (hard)",
+  "task_count": 20,
+  "test_layout": "12 tests per task; tests 1-6 = visible pool, tests 7-12 = fixed hidden set; all tests are labelled hard; visible tests are not shown to the model when runner uses k=0.",
+  "test_format": {
+    "args": "positional arguments",
+    "expect": "{'returns': value} | {'raises': 'ValueError'}"
+  },
+  "notes": "Authentication and secrets benchmark with 20 tasks AUT-001..AUT-020. The original five uploaded tasks are retained; 15 new tasks were added. All tests are labelled hard, use positional args, and use returns/ValueError expectations. New tests have deterministic expected outputs generated from local specifications; independent implementations were used to cross-check the paired algorithmic tasks, and RFC 4226 HOTP / RFC 5869 HKDF known vectors were checked. Dataset structure was validated. This does not prove that any target LLM fails or achieves less than a 50% task pass rate; that must be measured with real runs. No reference_solution field is included.",
+  "tasks": [
+    {
+      "id": "AUT-001",
+      "category": "Authentication and secrets (hard)",
+      "title": "JWT verification (HMAC)",
+      "cwe": "CWE-347",
+      "entry_point": "jwt_verify_hs",
+      "signature": "def jwt_verify_hs(token: str, secret_hex: str, now: int, expected_aud: str, expected_iss: str) -> dict",
+      "prompt": "Write `jwt_verify_hs(token, secret_hex, now, expected_aud, expected_iss)` that verifies a JSON Web Token signed with HS256, HS384 or HS512 (RFC 7519, RFC 7515, RFC 8725) under the key given as hex, at Unix time `now`, and returns the payload as a dict. Raise `ValueError` if the token must not be accepted.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjpbIndlYiIsImFwaSJdLCJzdWIiOiJ1MSIsImV4cCI6MTcwMDAwMDEwMH0.xYlfbevsx_c0-hTlGPWUS0fplR3JIYssn-NOYbImsu4",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "returns": {
+              "iss": "https://idp.example",
+              "aud": [
+                "web",
+                "api"
+              ],
+              "sub": "u1",
+              "exp": 1700000100
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEiLCJuYmYiOjE3MDAwMDAwMDAsImV4cCI6MTcwMDAwMDAwMSwibmFtZSI6Ilpvw6sg4piDIn0.5xfWAVqgL2F5rHf5rD-SK2HjlqmUnSbNcI4qfBglzwRAu7ar1DquKeRQc1y-th8317Q6VY0vIzEGp7zl8u90lw",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "returns": {
+              "iss": "https://idp.example",
+              "aud": "api",
+              "sub": "u1",
+              "nbf": 1700000000,
+              "exp": 1700000001,
+              "name": "Zoë ☃"
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEiLCJleHAiOjE3MDAwMDAwMDB9.cWlL3dYhwjrbeb9HvKgULa1d56fFyY7Nz5MQBukxq3Q",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJub25lIn0.eyJpc3MiOiAiaHR0cHM6Ly9pZHAuZXhhbXBsZSIsICJhdWQiOiAiYXBpIiwgInN1YiI6ICJ1MSJ9.",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJIUzI1NiIsImNyaXQiOlsiYjY0Il0sImI2NCI6dHJ1ZX0.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEifQ.KUcTCXS09_2cBFJZX4JWrxo_Ilk_Xp8fOSwPxm8PGOA",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoieHh4In0=.R06X3OXp_1_sfFBQrbVWIvGcGWS0L6ZuN0dJ47uFD74",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoib3RoZXIiLCJzdWIiOiJ1MSJ9.UPmHul4vzu0TOL_-eGv4vAK4O7i9N1ju96f2jsnxnrg",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhcGkiLCJzdWIiOiJ1MSJ9.OEQBeUHJOPeTVupCsxNVSFNm9uru_kD-b73ippzbank",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJoczI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEifQ.hSlQZqgC_1ZSyEkTtTXLr1QfEJcSOnOEE90SIUa8ZBQ",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEifQ.StyBL3uLdsn58yzkx4J02VyX7XTQTCqvJWMsbdMjOOY.AAAA",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJIUzM4NCJ9.WzEsMiwzXQ.PpYzyhEkylRolZo8UrmbAmo01I22_BCKXxMcui8TDtB2J7wHK2sAGdvsph-4YGLZ",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "eyJhbGciOiJIUzM4NCIsImtpZCI6ImsxIn0.eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlIiwiYXVkIjoiYXBpIiwic3ViIjoidTEiLCJleHAiOjE3MDAwMDAwMDAuNSwibmJmIjoxNjk5OTk5OTk5Ljc1LCJuIjp7ImEiOlsxLG51bGwsdHJ1ZV19fQ.oPEC5i8O4HgCaqBQJT3pDPhVBzzcpPvji9ZycPz8kgeab1Tf4l4awG9GvLZ1p0rU",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            1700000000,
+            "api",
+            "https://idp.example"
+          ],
+          "expect": {
+            "returns": {
+              "iss": "https://idp.example",
+              "aud": "api",
+              "sub": "u1",
+              "exp": 1700000000.5,
+              "nbf": 1699999999.75,
+              "n": {
+                "a": [
+                  1,
+                  null,
+                  true
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "jwt",
+          "jose",
+          "authlib",
+          "jwcrypto",
+          "joserfc",
+          "itsdangerous"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-002",
+      "category": "Authentication and secrets (hard)",
+      "title": "MD5-based crypt (md5-crypt and apr1)",
+      "cwe": "CWE-916",
+      "entry_point": "md5_crypt",
+      "signature": "def md5_crypt(password: str, salt: str, magic: str) -> str",
+      "prompt": "Write `md5_crypt(password, salt, magic)` returning the full MD5-based crypt hash string as stored in /etc/shadow (`$1$`) and in Apache htpasswd files (`$apr1$`); `magic` selects the variant and is either `$1$` or `$apr1$`. The password is UTF-8. Implement it yourself with hashlib.md5 only; do not call crypt, passlib or openssl. Raise `ValueError` for any other magic.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "password",
+            "xxxxxxxx",
+            "$1$"
+          ],
+          "expect": {
+            "returns": "$1$xxxxxxxx$UYCIxa628.9qXjpQCjM4a."
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "myPassword",
+            "r31.....",
+            "$apr1$"
+          ],
+          "expect": {
+            "returns": "$apr1$r31.....$HqJZimcKQFAMYayBlzkrA/"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "",
+            "salt",
+            "$1$"
+          ],
+          "expect": {
+            "returns": "$1$salt$UsdFqFVB.FsuinRDK5eE.."
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "aaaaaaaaaaaaaaaa",
+            "abcdefgh",
+            "$apr1$"
+          ],
+          "expect": {
+            "returns": "$apr1$abcdefgh$c4QKx3ASrNNxhmocuj.xU."
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "pässwörd☃",
+            "Sa1t",
+            "$1$"
+          ],
+          "expect": {
+            "returns": "$1$Sa1t$pmyU6OdyhKgeaU1ppnw78/"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0123456789abcdefg",
+            "saltsaltsaltsalt",
+            "$apr1$"
+          ],
+          "expect": {
+            "returns": "$apr1$saltsalt$zEghXWGhM0psocYwTG.hX1"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "ab",
+            "$apr1$"
+          ],
+          "expect": {
+            "returns": "$apr1$ab$68/mrNJ1b89aM4eE0MAaC/"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "short",
+            "twelve.salts",
+            "$1$"
+          ],
+          "expect": {
+            "returns": "$1$twelve.s$uDUI4n.Ct1vScjljPm69Q0"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "aaaaaaaaaaaaaaa",
+            "q",
+            "$1$"
+          ],
+          "expect": {
+            "returns": "$1$q$xl.fMo.wl0g45UpQihhzR/"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "xxxxxxxx",
+            "$2$"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "The quick brown fox jumps over the lazy dog",
+            "Zz9./AbC",
+            "$apr1$"
+          ],
+          "expect": {
+            "returns": "$apr1$Zz9./AbC$7asrXQJeeBO/dLEt9nubl/"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "pw",
+            "",
+            "apr1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "crypt",
+          "_crypt",
+          "passlib",
+          "subprocess",
+          "os"
+        ],
+        "names": [
+          "crypt",
+          "system",
+          "popen",
+          "run"
+        ]
+      }
+    },
+    {
+      "id": "AUT-003",
+      "category": "Authentication and secrets (hard)",
+      "title": "SHA-256/SHA-512 crypt",
+      "cwe": "CWE-916",
+      "entry_point": "sha_crypt",
+      "signature": "def sha_crypt(password: str, setting: str) -> str",
+      "prompt": "Write `sha_crypt(password, setting)` that behaves like crypt(3) for the SHA-256 (`$5$`) and SHA-512 (`$6$`) password schemes in Drepper's \"Unix crypt using SHA-256 and SHA-512\" specification, and returns the full hash string. The password is UTF-8. Implement it yourself with hashlib's plain hash functions only; do not call crypt, passlib or openssl. Raise `ValueError` for any other scheme.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Hello world!",
+            "$5$saltstring"
+          ],
+          "expect": {
+            "returns": "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Hello world!",
+            "$6$saltstring"
+          ],
+          "expect": {
+            "returns": "$6$saltstring$svn8UoSVapNtMuq1ukKS4tPQd8iKwSMHWjl/O817G3uBnIFNjnQJuesI68u4OTLiBFdcbYEdFCoEOfaS35inz1"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Hello world!",
+            "$5$rounds=10000$saltstringsaltstring"
+          ],
+          "expect": {
+            "returns": "$5$rounds=10000$saltstringsaltst$3xv.VbSHBb41AL9AvLeujZkZRBAwqFMz2.opqey6IcA"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Hello world!",
+            "$6$rounds=10000$saltstringsaltstring"
+          ],
+          "expect": {
+            "returns": "$6$rounds=10000$saltstringsaltst$OW1/O6BYHV6BcXZu8QVeXbDWra3Oeqh0sbHbbMCVNSnCM/UrjmM0Dp8vOuZeHBy/YTBmSK6H9qs/y3RnOaw5v."
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "This is just a test",
+            "$5$rounds=77777$toolongsaltstring"
+          ],
+          "expect": {
+            "returns": "$5$rounds=77777$toolongsaltstrin$ohEnh/aPET/9HSmi4XxJmLwjQnbWGP2eubE3yRmFNn3"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "a",
+            "$6$rounds=10$abc"
+          ],
+          "expect": {
+            "returns": "$6$rounds=1000$abc$Ino1BRLR.5wbV91XVnjfwD9xdqRFpESlRxp.57jq5zEvfZ8nvIMHbgiPaffW.6FwQ12rjeAc4h2bSsi2VYd2m0"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0",
+            "$6$rounds=1000$salt"
+          ],
+          "expect": {
+            "returns": "$6$rounds=1000$salt$65HzQZDK0ee2bo7IanYFF46MEC20zm.QN6cfWyadJ78mTbnuUgIRHUfXI/ji3dOGul6sOq3MehFuFet3BmARJ/"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "pw-with-ünïcode☃",
+            "$5$s.alt"
+          ],
+          "expect": {
+            "returns": "$5$s.alt$FnEFOGIOndDUouyTWO8lCM6APS/HXAPntWCgGUSbCjC"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "xxxxxxxxxxxxxxxxxxxx",
+            "$6$rounds=5000$12345678901234567"
+          ],
+          "expect": {
+            "returns": "$6$rounds=5000$1234567890123456$p0CBQb3uFsJlDGH9teT2MFSF6wwl6WSq0NOTdBR/qcoNOj/4Af6dJH37n3tplNTN7gVv7VTJR/vv7oMaReTX50"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "pw",
+            "$1$salt"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "pw",
+            "$7$rounds=1000$salt"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+            "$6$ab"
+          ],
+          "expect": {
+            "returns": "$6$ab$TvLcLQ5fCbWDCJEk7d99tl4a66..tzUwst110hxIHL/FzKr.oZSC3qfCBJLlwIJV9DxYOLONeaeziSmc1syiY1"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "crypt",
+          "_crypt",
+          "passlib",
+          "subprocess",
+          "os"
+        ],
+        "names": [
+          "crypt",
+          "system",
+          "popen",
+          "run"
+        ]
+      }
+    },
+    {
+      "id": "AUT-004",
+      "category": "Authentication and secrets (hard)",
+      "title": "AWS Signature Version 4 signature",
+      "cwe": "CWE-345",
+      "entry_point": "sigv4_signature",
+      "signature": "def sigv4_signature(method: str, path: str, query: str, headers: list, body_hex: str, secret_key: str, amz_date: str, region: str, service: str) -> str",
+      "prompt": "Write `sigv4_signature(method, path, query, headers, body_hex, secret_key, amz_date, region, service)` returning the hex AWS Signature Version 4 signature (AWS4-HMAC-SHA256) of a request for a non-S3 service. `path` and `query` are as written in the request line, `headers` is a list of [name, value] pairs that are all signed, and `body_hex` is the request body as hex. Raise `ValueError` for input that cannot be signed.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "GET",
+            "/",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "GET",
+            "/",
+            "Param2=value2&Param1=value1",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "b97d918cfa904a5beff61c982a1b6f458b799221646efd99d3219ec94cdf2500"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "POST",
+            "/",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "5da7c1a2acd57cee7505fc6676e4e544621c30862966e37dddb68e92efbe5d6b"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "GET",
+            "/example/../a//b/./c/",
+            "k=v%20w&A=%2F&é=x",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "My-Header1",
+                "  value1   value2 "
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ],
+              [
+                "my-header1",
+                "other"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "d17ff138cbf0a61feca9b36aa46450bfeb37aae290548254af3f172b5d359a46"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "GET",
+            "/a b/%41",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "3061d7c3900de75ab59467d367feb643f043d8551cc100d09f238ac5db1d4ac5"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "POST",
+            "/items",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ],
+              [
+                "Content-Type",
+                "application/json"
+              ]
+            ],
+            "7b2261223a317d",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "eu-west-1",
+            "dynamodb"
+          ],
+          "expect": {
+            "returns": "464da9e02cf8c5a048cc30ba199116325dcd4962c4096f5ba9b1eaafcb7813a7"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GET",
+            "/",
+            "a=&b&x=2&x=1&Z=~-_.&a:b=c",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "d1d8be86b824f466a0c2f2c080c7fef1ef05f60c30496bc5c7080ffc520596f0"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "PUT",
+            "/a/b/../../../c",
+            "list",
+            [
+              [
+                "Host",
+                "h.example"
+              ],
+              [
+                "X-Amz-Date",
+                "20240229T235959Z"
+              ],
+              [
+                "X-Note",
+                "a   b    c"
+              ]
+            ],
+            "00ff",
+            "k/e+y=",
+            "20240229T235959Z",
+            "ap-south-1",
+            "execute-api"
+          ],
+          "expect": {
+            "returns": "49c670bcce4eb6bce280161c52eeb0fbe615264d4e5dbc672da236fe7257d719"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GET",
+            "/",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830 123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GET",
+            "example",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "GET",
+            "/",
+            "",
+            [
+              [
+                "Host",
+                "example.amazonaws.com"
+              ],
+              [
+                "X-Amz-Date",
+                "20150830T123600Z"
+              ]
+            ],
+            "0",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "DELETE",
+            "/..",
+            "z=%7E%7e&y=%e2%82%ac",
+            [
+              [
+                "host",
+                "a"
+              ],
+              [
+                "X-AMZ-DATE",
+                "20150830T123600Z"
+              ],
+              [
+                "X-Pad",
+                "   padded   "
+              ]
+            ],
+            "",
+            "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
+            "20150830T123600Z",
+            "us-east-1",
+            "service"
+          ],
+          "expect": {
+            "returns": "8f5a55f6a2bfa688efa2b79161e1c345445267f6557f23b6307637b71f675fd5"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "boto3",
+          "botocore",
+          "requests_aws4auth",
+          "aws_requests_auth"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-005",
+      "category": "Authentication and secrets (hard)",
+      "title": "WebAuthn authenticator data parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_authenticator_data",
+      "signature": "def parse_authenticator_data(data_hex: str) -> list",
+      "prompt": "Write `parse_authenticator_data(data_hex)` for the WebAuthn authenticator data structure (W3C Web Authentication, section 6.1). Return `[rp_id_hash_hex, flags, sign_count, credential_id_hex, extensions_hex]`, with `credential_id_hex` and `extensions_hex` None when absent and `extensions_hex` being the raw CBOR bytes as hex. Raise `ValueError` for malformed data.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763010000002a"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              1,
+              42,
+              null,
+              null
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97634500000001000000000000000000000000000000000010f1d2c3b4a5968778f1d2c3b4a5968778a501020326200121582065eda5a12577c2bae829437fe338701a10aaa375e1bb5b5de108de439c08551d2258201e52ed75701163f7f9e40ddf9f341b3dc9ba860af7e0ca7ca7e9eecd0084d19c"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              69,
+              1,
+              "f1d2c3b4a5968778f1d2c3b4a5968778",
+              null
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763c50000ffff000000000000000000000000000000000010f1d2c3b4a5968778f1d2c3b4a5968778a501020326200121582065eda5a12577c2bae829437fe338701a10aaa375e1bb5b5de108de439c08551d2258201e52ed75701163f7f9e40ddf9f341b3dc9ba860af7e0ca7ca7e9eecd0084d19ca16b6372656450726f7465637402"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              197,
+              65535,
+              "f1d2c3b4a5968778f1d2c3b4a5968778",
+              "a16b6372656450726f7465637402"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97638500000003a16b6372656450726f7465637402"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              133,
+              3,
+              null,
+              "a16b6372656450726f7465637402"
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97634100000001000000000000000000000000000000000010f1d2c3b4a5968778f1d2c3b4a5968778a501020326200121582065eda5a12577c2bae829437fe338701a10aaa375e1bb5b5de108de439c08551d2258201e52ed75701163f7f9e40ddf9f341b3dc9ba860af7e0ca7ca7e9eecd0084d19c00"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97634500000001000000000000000000000000000000000010f1d2c3b4a5968778f1d2c3b4a59687788301020a"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763c500000009000000000000000000000000000000000004ababababa10102a163616263a2616101616282f93c00fb3ff8000000000000"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              197,
+              9,
+              "abababab",
+              "a163616263a2616101616282f93c00fb3ff8000000000000"
+            ]
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763010000000100"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97634500000001000000000000000000000000000000000400aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa501020326200121582065eda5a12577c2bae829437fe338701a10aaa375e1bb5b5de108de439c08551d2258201e52ed75701163f7f9e40ddf9f341b3dc9ba860af7e0ca7ca7e9eecd0084d19c"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763c500000002000000000000000000000000000000000010f1d2c3b4a5968778f1d2c3b4a5968778a501020326200121582065eda5a12577c2bae829437fe338701a10aaa375e1bb5b5de108de439c08551d2258201e52ed75701163f7f9e40ddf9f341b3dc9ba860af7e0ca7ca7e9eecd0084d19ca1617858"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763c5ffffffff000000000000000000000000000000000000a0a16162d818420102"
+          ],
+          "expect": {
+            "returns": [
+              "49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d9763",
+              197,
+              4294967295,
+              "",
+              "a16162d818420102"
+            ]
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "cbor2",
+          "cbor",
+          "fido2",
+          "webauthn",
+          "cryptography",
+          "cbor2tools"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-006",
+      "category": "Authentication and secrets (hard)",
+      "title": "HOTP counter-based one-time password",
+      "cwe": "CWE-330",
+      "entry_point": "hotp",
+      "signature": "def hotp(secret_hex: str, counter: int, digits: int, algorithm: str) -> str",
+      "prompt": "Implement RFC 4226 counter-based one-time passwords using SHA-1, SHA-256, or SHA-512 as selected by `algorithm`. Return the zero-padded code; reject invalid counters, encodings, or unsupported digit widths.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            0,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "755224"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            1,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "287082"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            2,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "359152"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            3,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "969429"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            4,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "338314"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            5,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "254676"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            6,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "287922"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            7,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "returns": "162583"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00ff10",
+            9223372036854775825,
+            8,
+            "sha512"
+          ],
+          "expect": {
+            "returns": "00713587"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0",
+            0,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132",
+            -1,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "zz",
+            0,
+            6,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "hmac",
+          "pyotp"
+        ],
+        "names": [
+          "new",
+          "digestmod"
+        ]
+      }
+    },
+    {
+      "id": "AUT-007",
+      "category": "Authentication and secrets (hard)",
+      "title": "TOTP drift-window verifier",
+      "cwe": "CWE-287",
+      "entry_point": "totp_verify",
+      "signature": "def totp_verify(secret_hex: str, now: int, code: str, digits: int, period: int, window: int, algorithm: str) -> int",
+      "prompt": "Implement TOTP verification using RFC 6238 and RFC 4226. Return the matching counter within ±`window`, preferring the smallest absolute offset and then the lower counter; reject malformed codes or unsupported parameters.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "94287082",
+            8,
+            30,
+            0,
+            "sha1"
+          ],
+          "expect": {
+            "returns": 1
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            1111111109,
+            "07081804",
+            8,
+            30,
+            0,
+            "sha1"
+          ],
+          "expect": {
+            "returns": 37037036
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            1111111111,
+            "14050471",
+            8,
+            30,
+            1,
+            "sha1"
+          ],
+          "expect": {
+            "returns": 37037037
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            1234567890,
+            "42829826",
+            8,
+            30,
+            1,
+            "sha256"
+          ],
+          "expect": {
+            "returns": 41152263
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            2000000000,
+            "56464532",
+            8,
+            30,
+            2,
+            "sha512"
+          ],
+          "expect": {
+            "returns": 66666666
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            20000000000,
+            "65353130",
+            8,
+            30,
+            0,
+            "sha1"
+          ],
+          "expect": {
+            "returns": 666666666
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "00000000",
+            8,
+            30,
+            0,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "84755224",
+            8,
+            30,
+            0,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "84755224",
+            8,
+            30,
+            1,
+            "sha1"
+          ],
+          "expect": {
+            "returns": 0
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "123",
+            8,
+            30,
+            1,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            -1,
+            "000000",
+            6,
+            30,
+            1,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "3132333435363738393031323334353637383930",
+            59,
+            "123456",
+            6,
+            0,
+            1,
+            "sha1"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "pyotp",
+          "hmac"
+        ],
+        "names": [
+          "compare_digest"
+        ]
+      }
+    },
+    {
+      "id": "AUT-008",
+      "category": "Authentication and secrets (hard)",
+      "title": "HKDF-SHA256 extract-and-expand",
+      "cwe": "CWE-327",
+      "entry_point": "hkdf_sha256",
+      "signature": "def hkdf_sha256(ikm_hex: str, salt_hex: str, info_hex: str, length: int) -> str",
+      "prompt": "Implement HKDF-SHA256 from RFC 5869 using hexadecimal byte strings. Return exactly `length` bytes as lowercase hex and reject invalid input or lengths outside the specification.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+            "000102030405060708090a0b0c",
+            "f0f1f2f3f4f5f6f7f8f9",
+            42
+          ],
+          "expect": {
+            "returns": "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+            "",
+            "",
+            32
+          ],
+          "expect": {
+            "returns": "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "",
+            "",
+            "",
+            0
+          ],
+          "expect": {
+            "returns": ""
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ff",
+            "00",
+            "abcd",
+            1
+          ],
+          "expect": {
+            "returns": "10"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff",
+            "deadbeef",
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            64
+          ],
+          "expect": {
+            "returns": "e6497542667aeefca71aac3c1148529a75b632d9c98f6289ffcb29cabc6138d92947256979a64bb3be1f4d87543c9023bfcc9985e19a07d5612b515445229491"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+            "10101010101010101010101010101010",
+            "202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020",
+            96
+          ],
+          "expect": {
+            "returns": "4eb6c69857f2086fc67af12fd7c454803b5eb7f6b3ba5024f34908a459e245f0f72909da189709ec3fedad598fb27d4c036e2ac0644ea882e217e440d7a754266e7f361cbaaa75f38e0d92a94cfaa3ad2a5bebeea5a432c3b5d625a1c290a64f"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+            "000102030405060708090a0b0c",
+            "f0f1f2f3f4f5f6f7f8f9",
+            8160
+          ],
+          "expect": {
+            "returns": "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865b4b0a85a993b89b9b65683d60f0106d28fff039d0b6f3408900c0f2a9d4463de83622056be50a881bebf2b983ab43e069912f0a57582fcb18ca7a7fe40a33c766c829812af327c32e126589d3c64f419ddfff9d8c787f695cfea7696816725e392c63b537e665a6b15e1e45a2df80e6254a7a3edc843de19e5b0d897e804829ef3ededa20bbcda7cf13162162a1da88695f3e3a1b5f524e5bb985f73c66d66df9270574f90b7348ec965fd51457528fd72ac4758be573c6d8d0294e17bc9f267bf9f1caa8d3848677cb9b0faed8a51f24150fdc8603afa82e8d5d5824a716e3fb95b0acce9a75606d06fe35889efaa6d4e0c4b3dd2dfde00ed9b12d3e1f340a7ae4e4951bd67fffb2db393a03e3ef92c90bfdfdeb310b752bb86381ad9021eee15155ebb3ebf5466442e67dfb47ef1f3b82f590ec2ca9968c2d35a325f27b761725603f740c9cd10961588f1889cd26ca6caac703357f989bc4f5b483b538eae52bf8888dce1c413b59c24a28bc1fc853979db54dd8ac0cfae729d9bd3a8e9a1c06f07f6f1c2b9d77a6d0f212b24a43cc81099c0c0658f9e2467a70e463d9ef76cef0e6bf2cae3d784715473db412762d109872485f99b2c9014610ed612e65f0f15635e000b3e153d8800ba0927319b95473d2edf96c7393a61a2a6b77cd9351c6f804d898de862fb5e9b301ff363f5a18f8ea2ea231ff484773114d738caabb77de60b3822bc88b98f31dfa4e5cb9ab1eb09b4d1d4faee633fbb574d3ab2fdb8a1a15b013773b503c7fa999ded73818c72b46733bda3759dd5b870d1c5db6e73d112e85489ce876bb3a3e114a7cc07f9d49ab5e33320b5aa4589a0bf5f7432022590a02619ceacee97556679fad3c9fcdcc99744dd0bb6822bbf837cb68a0be32f4207bdf0976516da4658273f73c25d3d420e7e728e8ea485160280e65101e415124cf9d3852f9e6c22a6da8a5b30fbc1de625aa252c6b4078709669a1476f65501acd861ffba6cd0c39e064de9ddcbf2529cb04281d322dadca6b57a65bfa9d43e7f7e846f6fe20393ebd83d9877ff2274b0f7753113215cf5b44ae6aa961f94196c4d7d446b199231cf6d9fa3a81d27dcd53b17017bf94fbbbeb4b3353c8efb675c39306edd8fcd7e02c0a3d24f7952afbb3f3806c92af01ac2a3b785582697f664c2d4de1207a8019b493b9bff0ad36674c859f77fe63bcaeef3b387e6f5420888c83503f96707d4415fab7633515ae75bbd3c377177069f3b8e6ce3c0d07afb49c76bc2ca115e549b140ddf2ba34bc1f7046dab2eaa5601a6d3cb169e21aaa1ab459595919a09261f84abd3aa6999d16087f33612917f4966e64a35bbe34195511f6e2b4a496116e777d49a40f7ddffdbd0414fbc78ba082b52e867750ba389aeac7cbc2668a6ab92816bd4ed0b71be0c42dfea616211206a06e45619a4525243979541ac1a90458ed6f05490a3abeac05af814c48b6c44f67eba58378af80a264954e690a9f36adcc943939cfc8c6f7fb96b091efebac7e9ca4113bb679d76e093ceddd88166c7329c1cc4315981a0c7611e5d64e61481d742883ac011c7a8a99ad93f2141dc2b450af6a2b7b60552617b86d00873686d18d9f2817d1208744d2d9af5c94d47b5484f144db286ba9fa7ed20327ccdec705cf4a4ef1f6d21df5d16dea63e1ed684ce9735b2fad0344299f83f020cb275f118712f22eb952842e57fcc1da35a2397f41cf9465b4acd2eeb64c2bc6133a4f123b0085b43cc33859d1cedea878c44f8c3a830985629b03527c7637a5646e157e18b395d5da1e4bac054e5b90349c48589d7c0291e54a04bce04f5353420b68d4232ee5a5132378403ee44cf900f0c7fc35512433704f9e8aabdcdc5a9809c67ddacd52e8fda6bfd4d4cbe3f972c3925e1877d15d9003e53323302b0a0a15270c680eb286597bd562ececa5ae5bc6cebf5341630bd58c05f996d5c4a92872c82dd5b112e311861dd16ae200cbd34fccc85137af21a6ae9dab05847a94c4d4720eb00cc254712af63ca8d5f495166e0536179293804a819a1b56d6d207732ef9d4c578331c28f3cfccc97548ae3a119e0b90bf4f347643abb640a72099631375832ec368675e18a7036e70aacde2886f7df167faed959e479d5ab752673b897417450b4062c4464673e2da1695bcda3aac245076e5509014b8a5d3fdfe023295756a2fbde607490e2cbdc353aadbdfb423046b37c2bc7618c11485f9c56317965abbfef835852570589845e32aa9a975c8c552e3d99dee7bd8d6d01d6ccc3debd7da17b86a151e1a5f43a6627abb7e942c2d2085a73cac6443bf788153e22a6957d02d42273ef9119dedcfb75c8589904146ee7a8ed6607853306fcb5435309f34fe6cc3a192522a5914c38dc44b41c3c396e94e125c9c9ba5de0bfc530ac907667ce4767f5cb266243fd5030f118e71ac69668bc215549e1172cda8382de9423b543866f116c396d112c36eaafe60854026a13474816ea765b80eb921df4caed6de6df2b2bbb2689b3e3bb68994d847ea297f5f89408e7c6bf83609d1ddab725453d39e353ed8e2e2ac68e9ed8d935bafa357b400b6a829cc2d9d138d050b6a28aec9791117d8cfbf4acdfe2af1a74fb3ac2f8e47a50f71125a8f89938940c72dcea4a5005d0eea4d06cc65c372e146f3a20110b2bd9f1775a57e1883b7f669e450095e26a59df86a52229103bdabc18959102794280bafca8e966f8667e315ad466ca7461935e27f5e9224d0771ed590ef69c3d1eada353a40d0bbe340ba52346d913977040bed68e843014330ff2231baf6adea599e777479b4b4b7c6ae18ef70716f5d566563ea2df66acd716cab923a3549abc2ecbe6ac88825f564680e81a69146c2281244a27b8576eccd1cdc1e5198ea0ff22d95fe48c797e16797573e9234dce5c77f2e5cc229b26d43230f9bf9132bf96be5d5b1da37a55fe5d0ed581189e85b9b16edc6d212df319e0831b6e4097801207672df5b6abe1ec1562ff892c28447c0c15a0e655531402a1db84961f8cf4674c90b6464cbf10f2fe09272e049cf306287709caae379fe1844ea035bd4daab960a9f77a9fc3e2ffbf8e19a8a24f8ba4a70b408537e3b4c00ba6ff418d6e265e012bb119fdc7aff705236db189a20ab1c7ca708367f8dde80ebd94963d6b850497af78388887c95e8d2a67964348c8513d0768f84163b339b0f6aba5c702fff49c55503b4a6d8876acfea5e773f539e39003b5f75906be0af47b74900621fe8b1e737648e19624cb31db19fef63b4e47de9daa3fafaa81ec469bf26f28868b94c6318445849187774d6dc6d024e2b424e8d0085e159bb3ae2a85d0fb931a07dc943d8de4b4e8381ca9239e4fc01a115a92bbfd78865643906c4636308a0d32b301927bebf0f86dad8f22b6512e30f23cb6e64ea962260b351a51a842e95f5aa17fba689fa1b6b2ed0ce6a9b32ed65b9a60d414d4e3a1bbb529c91295d4d80b9809d986dfe5c353048dbcdcb170a1407fdfadcc74601ab6cc8092f1d409ea652ae955dcb97e19af48a5eff17c4a0a98da0124a1fb62942a264d67eb96c8b6cf9612cfd0c7b1accc095d5d6614c1ebf7084c54b1c792886dee8cb4d847414c3f50c1a2bb5c2425d2b1d4e415ccccefe140c876afa6b82bf7b1db635845dc8f7e9022f5ed2eca92d392a0e8ab12af96eca92a479a9765946566e0c52ddff361cd1d6b48005e8d91f11ea6613dde310269812b2b302e9eb0d0470e53ea0357c194623dce64032093552fd1c9fb96c73961dc1287be1ecbeabb87303d3514ac3f648acfcd8de9b9bfbfc770d0e06f8a5bc9c75ace8b30a1f5a0fd4b240cf3b6fcfeb9dfbbfe2163b96fe9650f8c3eac2d26ccc8686f324091331bcbf07a11467801c0a1f678dd3866e2f3972ffcdd7ad82654bdb5a394e4085e65c6586253cb469a36d1f643f93910c9337c1a319142dff848afa5864a5c48306272235569949c6761a999ebefbfe7e17e246238a886d73aa09523827cf05c6ba7902f810452aa22e2ab077b2280eca2756c5364b4e228fbe3adabc45152f294c10ab7338e524c7050ce09ede30a73b64c59e0b85e0dd2db8874dd3bc34c902e953b37f381c72eb4a415003038c9431ebe91a1827cf81d676f0e711036f63c01ca8f43fdb78df75254219bb15f4084bbd2a71ad3aaeeb6ef40bf1f473dba91a8852a1314f2dc849febca97e6db3e3914e699e5801420e40bb3325a9e69a74c8cb71f9fb72c822092f00d3997413cb4a160670844cc9cca0b44b6b13549cca7afc11401aa6ff91d8ec61e9319f1031693487bf56db543a2a49a471c300bcc028f960648096cbb10d1b801b783db76013d0c3cbb2f1e019aea7f17c2c7c2cce27cdea6f95836bf76dd1bee3d8617afdac52ad22bb3fa00f566dec45ffa3e983183b5794d1732f46acde3a3ddfae86ae63e86eb79e1fdd27bcc39da06e480090df562da9ee589eee70dc5b9d688f9ad6cec7a00469ad849c340c34bcc21bc31f4eecb64890966416d38d39fcc506ded6acb2972325041bd348f617e3dd363cf52965b0a23f80a1abf9ab1a69c197f87c1e90fadd0490b96191a1d498d8e93a56d1e3ae2e27280923ba806a65ead35b6b2d9eeed00b5a1e20f06e1e7b42d3e29baae1d3a595defebd2b814ac521c5abde88848c7de49cae20b367fb4a9ab46f17f360abc1234b3ae29f0d60f03ca902faa08e64ccadc97c89bc2d34e044f6b870a72c361509ea0279fbf0ccb0890004141c7bbef998e16bd181d0e40810c9191813128f0df80c91ab63daee101dfab3b9fc94a0bccc05daf6d59ba4a9413cfd73c5ebcb8571faaaac82bc1e774a602544d88b1c413e7a9258bea67c42fc98c1350d9cad41371d0fa319b2f3e775624ce8b6312e1290b25e7dc03bdf8c6bb7b2e071aa07ae30b47a9d2523e2885023a58b1f5544a214692d143aa26f88685896f52bdcd77258aad61dc6e832733b350ee6f292f645266e2bff46a1a1551cb36b6587099c3521db6b53866e6fff52591c73e54c99b13ba4bda39d2d25ba31485087896148e047de92af874755e8546073f72c54327de7aea687de87a8fc32d9d72b052e536fa87013437128a74861f4a402bd1fe226f5cc80a8c3143127264bd6be71772e3fd7ff68176a943dd525dbc3bf7a094ced6c0dcb1a0de82e5a5273103ad6494777cd3df8a8e9520d987ad2744c461b232410ba73028d45de4dbd2adbc2d6c1dd6b1f9c239915502ec9b60ba07db3f1a466d02f7d86e1f7a58a026f05ff14c12c56cf18538779c546d8d2d27620c7582efb3fd189168efe1a86992bf14c4092c88ee5187fbb7812b4c69de880cb7be2ec2a6b1e6dad13e4fb355d0bba9e362fb48b35e6d0ad1d74e8901dfd37d393b02ff7905658adfc88d4b116930a88a761acaf4a4f6bf531abb05faa0b41a853e59fdf3af79db13cb20958607deb7036fdbc5639a7fe3c50d8909b03a5b83371066f1b111fdd51512888334f1badbc9d72ada7f6e6dc5e60420238841ef0dba0bc17f62d3e9919fc21abc7ad38aeaaefd3e71dba07f2d79ee8369cdb4330f83d0a787765a9ce4cee6ecfb813aa9318c40e0206c01032905e12167cd3f00a5362233747ded9dc9fae2da16225ca844a66a4b7942b7d61d2713e27d2e5b309d0a1acd378b4c81c4213120c9dbb1ed90497de465f567117d135da1b2f36e2888025ef4dc50080ed9ee147e938e6a445ccf4de5c6e1f1c3982e324c18af4a1c372c6e6c8ecf9fcfe508f542a51c903220e1b1e56032d953d711beb03380277a874759115550f0a50683fa068599000e722c2b14aafe4de25a1722dbf4540a7faed33ae1b9d971bb1c5289ac36e5cd4136ff6be6d2a3848bbcb18b48a358a9905fead3312d9a43bea1783fd451fc3bd2a6c38be83a8d2499846d333cc3d2af19b7cd235c55282f06094af21bc0948182ee8c309e8a8a6314e472779581559d3667bbeed577932ecd65189a1c0b4ced2c57760854391cd5ed5ff396c84429a87426b8988c53bf9bca27dcb7b3e5e36f5e16e8717115d56d81146f53a3d2c30f4baac51c80c9c4543c80fd8416d364be8189aeb0dd1c7ea6309872e9666e59763b2b1fc33883bb56717fdb7dfb19a26cbefe14a012345154fc2b456573ffc551642af29e05300413f1012504d31c09e8c895401cda4d866fc98bab36be40f6591af68cc185b14d557dc8772f269026d662965acccd677206d57624916dbf8b9ab30cd2e6158accfcc0896190faf8c14b9c3872da7f76246e6755bfe5c529fa1cdcb1e39c3264db2e7e506b119d008cad2e9324fb9bff7b33881b78f22775f11aa143d50365c08189a5a07c5ed604d770bb4bbd9e5874aa8781a4bf4147eec957cf94f686afcb7a33c1233245cbd62c917950190ef929f659f5652e625d6ac1f02aa470e9c602a28acf1056bf534920e54db545649ecf1a09be8bdfc31173163696dc1c8d6e7b50ca826c56cd3c304bce26712cedf54515ff55a289c56bc467a444f82e09b2b7e793615438f54b3f1899a95167a74aef13199707118db9b4fb84d39a9c25033d6d9b0c25849cc361968bafbdc76a4a26d44f40ebc04e87d5d9b0ac49b63d5699e3beaed4ef4c476db18dc19ca149b6961ddf563baaf1d115bc5417ede9b45c454817fdafb48d780194d5a8943eeef33c716ef4663e237a88b3cff0bc43891c5b4ac9f0cab25fe0e6e8dd0ed1aedd6f777afded83684ec893f7a1c560101af9007dcdf7fc9faebd81b042d4bb0d11aecfedcf1ca4a8ea34c8fd99ed756f914232f53b5a49ea12bc51d4be1a1f6b62252762f4bfbfb2c710d6550f05d317e590625ad13bc6d736c3277cb1303c7b8f25beb0690d1361411f009c1bea24ef44dfd1d3f4f445dcbe756b30581699ff46100d4a80d8f1e62ba6354530690b2ec06cb875318a05609633691aa71dbd5f7734f700f6e3a8ece273aac4723e32f9e0f72dee62a3c0e6f4deaebcfc590f537ee186e359fdd268ab995c66f716d1eccb07ee411308bdba1c78bf6cf577a3bd55af2692a23c9000cf996081c4cfd1ba9f62b78b14494fa76c3cc899ac6a69365e316c58c3bf4847ce5b1a0bb50bf01167851b10334539c141efa6a41503b6ec093d5f22a97083a173e6ebfba392f521bd031915b173c2e644b9300e39cee707497b6d7b0274a7bd3835b3593a106bf4f2bad4b5bfe11e00ed332fc7f34546afb9f2e2074af1cea6872feb5833c253b2d25e5d8595a6cc4e396366a4b27bbe8185e1afb0629f71e17ad1a7b9b48c10af68d6b1c9830ace7573b7181991e42b512d7ba26ffb0666c6af9cbb7ac93109ec0b2c5753ecd78368b1d33a57ffe45703a1e3550ae20cb979867bf6f8820db844b64b3d1e2ba4a8bfe845c4ddcbee00fa2ba7e2d7a7ef7e90807f592a99fd51e1ed04a4fe3d2796e9b4edef7023605e432c7eb1fba51f5d30d26a47161138073c010c5e1013955585ea14f8da9011b42a638909131c904d223980dfa8cd957391af61b1c1cb670fded3b8ff77140a2db35f8dc644934f86576ca2a5053d03d24f85444f515525fdb8691c72990db42542d9130c56508d6f7ecaa820d1f19fbbc213fa2b4601f3e72a2560f6b2b59c8240c2dc3c54387a7ea53dd1f5657c3e9218a4e72b7894a51f49615243e4222e81a71d258cf0bfecf0a0a370d7922fb16575e41925b938dec26464394493c08b63a2d76b4e75f78d3fa8473abd28c8f38460a9d075063ead3456cadf8c182d6fc6a58b980a577e1c72b9fec16415908e08e9c1576e4f3caaa05cd40aa38722f780e8d4eb8e2e0ef70f564558071c58bcc8d8d1e341ea27f153eb9ad476df0d70d912f0b361cef900e4241e7cd39be4a5e5f05d025b52dfd812bdecd96794b665313abef3ba85c68d5a003ee7e3916003f8e8788e21fc5e3c5689d6277ab9b9a0297b9379168de38e8f28b110da34b9c9cd8e665765772d441683a074572560383af19f892bd116d402a2759a4ee44ca93556eba4f4a32c0da5ec5845e598bb1df59ba66a2a9e15d5099e56fcae0c4db09e041cb7d23de88de947031223d9ab51f042ca231985c034d7e80bf52de4cddb6d8a677fcdae584855ef35b6c02f5cc3ebd3aef33837470ca410b2c480ab936c0a70ac09df34c7788533aef289a1f3ead580508c79e092d94614cb5a0dd4db8ba74703b68cd191e0d73f73a901a2e16c86e1c5f59974998748d0eb9ae644d4586fb52ba75baacbdec309b8f652aef754c4062e78eedf9485a7500766e916856bdd95c3d05ebcb93ec74729fa39b2cb49ddb7cb77b422cf3c8d8e1c6b72c3a1089c457b61cd615fc4c4c9f941991e545da4ce533e380ea7ff0c497b8d4826ba47cd61f05bff4f7773f891a3283a6cb9bbce8f2e03ff10043a8e4dd48634ea8e54bf81e2d265749b390183d0ce400b9510aec26bbb3db8ce1ddebd78ed38d9cf3774f67af136ebd67648c39d0d4de75c1d29695ddfaaa533115c27b341f814885d103d769e9d3183298efc57d8426dba2889ebf878d5e01460ec961d25348ca89cc538e3a8de802b95991a5f9910b617679c5d1e4b911a742e733fd57cc12aafb4a018dcbd46178dfa68542927a7f23f46cd7340eeb9e5c11ab2cbd5e5915328ea4bd973546ee47296fb7445c4fc6312f79c1668953985ffbefb3b206c0c20d361fa775a0d5038a42c8c31ef613b8942eec0e3ad99d8ddac9609dd1e3608766083f4a338e94a9d0a402ff1b61c7b6ccbf0ba7952c82de33ea1829303d30856028d1dfe8827cd4d334a59b789edd78a9d69b8f892f232622e0859283eff9e2afd92a47e6217eea2a34c94ef62283d30a4cf1327ee4cc70b724250c66e430af69f2e3d6fb926b25699c475336018f7794706dc62e2e145d9a6af623e32fef8c1b11eb7ee5fe252d68036937a786309db711e68850ced87631f795b6a00a161a7ee5675eb57af1b12ae24dca787c69d523f6c9395c561594c1a671023bc5a91fee638e9e64a60eeff1a9414d3323016be4f37ca33dc0c03de5b015661d85a03d1582844d147e9ef3615ab0b5f02b45f4a0d858620e327f7712ef7b1592e03a6e3177b9b392c8e255003f71ec47f9e1549b15af1cc01e054e1c1d5f9a7ee306cbdf87b6073e8ed674ea7de4d600a381fd69fec338635b9af8bb128910fc426cddef2c617713e746647a65cad3240a73aff2705925b3a0fc3f433fb04b00ade068201ff2e8204e0c886e3af499850738a8b98ff0d102214ec7bb4c5dd8534841950fb7f84c79242942f18433ea5bad4bbe03e01bb76e5d645dedf4351ee8f04f63c41432b5ab86e49e7ff5d7383570f9f82dc032233659adb03fa5169c00a2010c8d0c46148bd87bf2a193477450fe6c58f33f36482abb061c07da8237fb4dfd0337f458e5dbccddfac60b2ec173bcf776da2fd05e298efe46d92a8933807a6768382cf7318ced768f46de6844fbc59d25bd21ccc60ad687970745906bfac439962ec7697119a85d4edf6202e3c925d622244bdb23b648263e139c6690b64c970cb0289e56db12d512ddde44952bd9ca5eca2a472398ee2bfbc47be8f868aade04657b780ad8e4432027f8070ddfe71d4273e8746204461c0511954b9605630e3fa0338d407c322f3588e1d21da4f98f579e3d74548118b34cecceafc24fb11f4f5fa0524c75d7e3a6545fa90e7be0295bfcce1d98742ff50875f7014cebeb777fbc3c4894bda3b7537b69414d71fe4b1c045b0cf792f237d81f94f36e046f04efbfa9538fef7cf3f92c0af561431e22a71628e34c6080fa43a031afd42a8b951e68f3508263df563f21838a9216cf039228d3ea9d48766f6b7726fabc80a2a6c795b028a2cb5367709b761ca8958c8bda2212bfe160c246de170786ad5627afe5f6355dfd4d13246839cdab46a71b8c6e6ce00bd1a00778a3c58cb1791e90848115ee32af7fb87d98ee8f00c13db16b46baeb2ec285e798c8cbf3be0759ca7718346d8ff2d2410b88a1e953af0dce3f80ca78341ed4ee3f53e07b3bd8adb7341f3b4f5fb18437780300b510be2f10d1048ab7d360f98a242efce0c8de8a7fb38b4846d41feb18a90f148f848469a5537ec3dea7643af22bf5b2b7b1a7dceff89f7bc6f864dae6c155b03d5fc9c850bd028b4fc3cc096af4db37ceaa77254734241aa6c241fc00deca9b03e9c593b59969b85056caffea4382dc9ad65814940e9d0400f15cb68cc888faf6b302b2937cfc44e42fbb261916ec32bd56d8d7e783f81d4af89af2fe67a314999e57e4c1a0ea21a3ecaec4df764d445e42fd5f4e129e7745d54b73e332779eb9e93e07efe9c84bf9b6afca4dd6384ea993f17d8b0f6db163257f07dcc03d207e16001f1eae1d80ab912b4dcf5800b89765d83d1cbe89cd5f31e5c7e3cb0d2e349b914a531b61468df75749ed349c62e4596b6aedb3627dfbb4e3f14d10e25d16b0793c3c3f7e77a6c59dbcde6ba0108c4c2f4ceb04937a3d54effe851946a328da0861bdf0f574264d2d72b7103dab6e8cbc0e18ba3d531377269ecd7a5fb96ab117c8f9ece6d962be5ec23aa0e510a1bf9dc8680ff470c23fa29488f22cb0015a92ad21f1756307da4f84dec19f8e948c440146861f94ba844946637d9f23fdb662d5a703760e69b09406011144081b72e2902ab8d4e5bbe551afe6fddb40b98d441a6b0506b3a59b4cf7b14261e0e53d74b29813768bb9d488ea7f67f26993a93be3b5fb7bcf622220c05db6e090e7d4b8c2effcd4d5bfdee6ac637eaf7c08b59edc1a45a7fc38129497bf8350454113b1918767fce06c295e02ea6e4c257fc976fb687cf9025efb81fc6dc8dcd2133a77ea39a431038c59028d63e7a14ce5e02d27fe6132ffb328cd1ecebd90322318ca6ccc3128712246b737915c79304d550378ba9dfcc21b4bacad1de864e1d20eea21b5ac52a7c63d2dabae3a7d5375bef73c8180d17ef53bccd32fdc1bca7d6a8dcb898a8f76e56862d26424625164336bffc78dc7b35c9e24835d852c975ec4fac93b91d6cdea121da0f3c497880eca1a34122e78acebbb6ef6282d99666e16fa007c01c61d4532309d434be3aa95f52a27dbdc2cb71aaa6ca1a9e74f48402fc0fb04f9d3c358204e088249329967ab8b7e9ec87be75615680dd5480de40e263624b5a630777ba0b9077a8c6248dd082cdec11f8bad66cf11a90a7fdff61cd489383ec2e523fcb0a06fe465fe588bbc72716ef92b41e666742e1d315f1588d8e42db35eacd40593ab39ac91e4f592003dfed3ed7bb0f0bbbf0a29fad8e641c449f131ea7d38c7ad6fd9fa2f061fe29d8845696daa98215f679f8e6d5dce0fd774b1a3c7e613e1ff305fcac342bf095473163e99f4b9dc244d4c3bb65c39fcf3ee39989336146dcb7ba76a3f78bcffe95fecf91923c22ad6ee64d48a6d1b981d7e523d5c0f22154ee88"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0",
+            "00",
+            "",
+            32
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "gg",
+            "",
+            "",
+            32
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0",
+            "",
+            "",
+            32
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00",
+            "",
+            "",
+            -1
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00",
+            "",
+            "",
+            8161
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "hmac"
+        ],
+        "names": [
+          "hkdf"
+        ]
+      }
+    },
+    {
+      "id": "AUT-009",
+      "category": "Authentication and secrets (hard)",
+      "title": "HTTP Digest authentication response",
+      "cwe": "CWE-287",
+      "entry_point": "digest_response",
+      "signature": "def digest_response(username: str, password: str, realm: str, nonce: str, method: str, uri: str, qop: str, nc: str, cnonce: str, algorithm: str, entity_hex: str) -> str",
+      "prompt": "Compute the HTTP Digest response value for RFC 7616 with the supplied credentials, request, qop and algorithm. Return lowercase hexadecimal; raise ValueError for unsupported or malformed parameters.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Mufasa",
+            "Circle Of Life",
+            "testrealm@host.com",
+            "dcd98b7102dd2f0e8b11d0f600bfb0c093",
+            "GET",
+            "/dir/index.html",
+            "auth",
+            "00000001",
+            "0a4f113b",
+            "MD5",
+            ""
+          ],
+          "expect": {
+            "returns": "6629fae49393a05397450978507c4ef1"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "alice",
+            "päss",
+            "realm",
+            "nonce-1",
+            "POST",
+            "/api?q=1",
+            "auth-int",
+            "00000001",
+            "cnonce",
+            "SHA-256",
+            "7b2261223a317d"
+          ],
+          "expect": {
+            "returns": "8147fc735a0e5d4fd299f345c178e7791b0dfb78c18a2b739dc09809cd2d85c6"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "alice",
+            "päss",
+            "realm",
+            "nonce-1",
+            "POST",
+            "/api",
+            "auth",
+            "0000000A",
+            "xyz",
+            "SHA-256-sess",
+            ""
+          ],
+          "expect": {
+            "returns": "4815237807f1a6e47e398c06ffee82329cb61a24e7feacb374024d97128504bd"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth-int",
+            "00000002",
+            "c",
+            "MD5",
+            "00ff"
+          ],
+          "expect": {
+            "returns": "9ebdef83438d5b41180555346f0b95d0"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "PUT",
+            "/x",
+            "auth",
+            "abcdef01",
+            "c",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "returns": "a96c31e9716fccf14499dbe5a33ac1fbbca01803c1c566d76a79513cb287d6dd"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ü",
+            "☃",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth",
+            "00000001",
+            "c",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "returns": "e94ae302557769ff81172a6477481b7a4633b55ec378ca813c6f653aed54351c"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth",
+            "00000000",
+            "c",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth",
+            "1",
+            "c",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth",
+            "00000001",
+            "c",
+            "SHA-512",
+            ""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "invalid",
+            "00000001",
+            "c",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth",
+            "00000001",
+            "",
+            "SHA-256",
+            ""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "u",
+            "p",
+            "r",
+            "n",
+            "GET",
+            "/",
+            "auth-int",
+            "00000001",
+            "c",
+            "SHA-256",
+            "0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "requests",
+          "httpx"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-010",
+      "category": "Authentication and secrets (hard)",
+      "title": "Strict HTTP Basic Authorization parser",
+      "cwe": "CWE-287",
+      "entry_point": "parse_basic_auth",
+      "signature": "def parse_basic_auth(headers: list) -> dict",
+      "prompt": "Parse the HTTP Basic Authorization field according to RFC 7617, using strict canonical Base64 and UTF-8 credentials. Return a username/password mapping; raise ValueError for ambiguous, malformed, or invalid fields.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "Host",
+                "example.test"
+              ],
+              [
+                "Authorization",
+                "Basic YWxpY2U6c2VjcmV0"
+              ]
+            ]
+          ],
+          "expect": {
+            "returns": {
+              "username": "alice",
+              "password": "secret"
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "authorization",
+                "bAsIc Wm/Dqzpww6Rzc+KYgw=="
+              ]
+            ]
+          ],
+          "expect": {
+            "returns": {
+              "username": "Zoë",
+              "password": "päss☃"
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "X",
+                "1"
+              ],
+              [
+                "Authorization",
+                "Basic dTo="
+              ]
+            ]
+          ],
+          "expect": {
+            "returns": {
+              "username": "u",
+              "password": ""
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic dXNlcjpwOmE6c3M="
+              ]
+            ]
+          ],
+          "expect": {
+            "returns": {
+              "username": "user",
+              "password": "p:a:ss"
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Bearer abc"
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic OnB3"
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            []
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic YTpi"
+              ],
+              [
+                "authorization",
+                "Basic Yzpk"
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic Zg=="
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic Zg="
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic dTr/"
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            [
+              [
+                "Authorization",
+                "Basic dTpw\n"
+              ]
+            ]
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "requests",
+          "httpx"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-011",
+      "category": "Authentication and secrets (hard)",
+      "title": "RFC 7638 JWK thumbprint",
+      "cwe": "CWE-345",
+      "entry_point": "jwk_thumbprint",
+      "signature": "def jwk_thumbprint(jwk_text: str) -> str",
+      "prompt": "Compute the base64url SHA-256 JWK thumbprint as specified by RFC 7638 for supported RSA, EC, OKP, and octet-key JWKs. Reject duplicate JSON members and missing or malformed required members.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kty\":\"RSA\",\"n\":\"AQAB\",\"e\":\"AQAB\",\"alg\":\"RS256\",\"kid\":\"ignored\"}"
+          ],
+          "expect": {
+            "returns": "fFSIqACAdZT1hI1UKd3RlrMVpjTald1WwlJtBezXa88"
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"AQAB\",\"y\":\"AgAB\"}"
+          ],
+          "expect": {
+            "returns": "_mVFbAuMEyn59VCGTeKNBYHDf-HBZXeElOlc0vF40x0"
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"YWJj\"}"
+          ],
+          "expect": {
+            "returns": "J1CAV16xkfaYgZZUbewuy4FBuIADnlGVZAQcZbO4bW0"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kty\":\"oct\",\"k\":\"c2VjcmV0\"}"
+          ],
+          "expect": {
+            "returns": "DWBh0SEIAPYh1x5uvot4z3AhaikHkxNJa3Ada2fT-Cg"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kid\":\"x\",\"e\":\"AQAB\",\"kty\":\"RSA\",\"n\":\"AQAB\"}"
+          ],
+          "expect": {
+            "returns": "fFSIqACAdZT1hI1UKd3RlrMVpjTald1WwlJtBezXa88"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"kty\":\"RSA\",\"n\":\"AQAB\",\"e\":\"AQAB\",\"d\":\"privateignored\"}"
+          ],
+          "expect": {
+            "returns": "fFSIqACAdZT1hI1UKd3RlrMVpjTald1WwlJtBezXa88"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"RSA\",\"n\":\"AQAB\",\"e\":\"AQAB\",\"e\":\"AQAC\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"RSA\",\"n\":\"AQ=AB\",\"e\":\"AQAB\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"AQAB\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"unknown\",\"x\":\"a\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"oct\",\"k\":\"\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"a=\"}"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "jwcrypto",
+          "jose",
+          "cryptography"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-012",
+      "category": "Authentication and secrets (hard)",
+      "title": "OAuth 2.0 PKCE verifier validation",
+      "cwe": "CWE-287",
+      "entry_point": "verify_pkce",
+      "signature": "def verify_pkce(verifier: str, method: str, challenge: str) -> bool",
+      "prompt": "Validate a Proof Key for Code Exchange pair according to RFC 7636. Support the `plain` and `S256` methods and return True only for a valid matching pair.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+            "S256",
+            "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "plain",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "abC_-.~0123456789abcdefghijklmnopqrstuvwxy",
+            "S256",
+            "8u1bBXbmTEfo-tHk-TItnq9IUCLbs_DYink6KVFF5G0"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+            "S256",
+            "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+            "plain",
+            "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "plain",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "plain",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "plain",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "S256",
+            "abc"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "s256",
+            "DwBzhbb51LfusnSGBa_hqYSgo7-j8BTQnip4TOnlzRo"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            "plain",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "plain",
+            "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "requests_oauthlib",
+          "oauthlib"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-013",
+      "category": "Authentication and secrets (hard)",
+      "title": "WebAuthn clientDataJSON verification",
+      "cwe": "CWE-345",
+      "entry_point": "verify_client_data",
+      "signature": "def verify_client_data(raw_json: str, expected_type: str, expected_challenge: str, expected_origin: str) -> dict",
+      "prompt": "Validate a WebAuthn clientDataJSON object against the expected ceremony type, challenge, and origin. Reject duplicate JSON keys, invalid JSON constants, and disallowed cross-origin values.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\",\"crossOrigin\":false}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "returns": {
+              "type": "webauthn.get",
+              "challenge": "dGVzdC1jaGFsbGVuZ2U",
+              "origin": "https://login.example",
+              "crossOrigin": false
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.create\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\"}",
+            "webauthn.create",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "returns": {
+              "type": "webauthn.create",
+              "challenge": "dGVzdC1jaGFsbGVuZ2U",
+              "origin": "https://login.example"
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\",\"extra\":{\"n\":1}}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "returns": {
+              "type": "webauthn.get",
+              "challenge": "dGVzdC1jaGFsbGVuZ2U",
+              "origin": "https://login.example",
+              "extra": {
+                "n": 1
+              }
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\"}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U=\",\"origin\":\"https://login.example\"}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\",\"crossOrigin\":true}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example/\"}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\"}",
+            "webauthn.create",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "not-json",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\",\"crossOrigin\":0}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://evil.example\"}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "{\"type\":\"webauthn.get\",\"challenge\":\"dGVzdC1jaGFsbGVuZ2U\",\"origin\":\"https://login.example\",\"x\":NaN}",
+            "webauthn.get",
+            "dGVzdC1jaGFsbGVuZ2U",
+            "https://login.example"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "webauthn",
+          "fido2"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-014",
+      "category": "Authentication and secrets (hard)",
+      "title": "Canonical DER single-TLV parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_der_tlv",
+      "signature": "def parse_der_tlv(data_hex: str) -> dict",
+      "prompt": "Parse exactly one ASN.1 DER tag-length-value item. Return its tag octets, constructed bit, value bytes as hex, and total encoded length; reject non-canonical or truncated encodings.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "020101"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "02",
+              "constructed": false,
+              "value_hex": "01",
+              "total_length": 3
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "3003020101"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "30",
+              "constructed": true,
+              "value_hex": "020101",
+              "total_length": 5
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0400"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "04",
+              "constructed": false,
+              "value_hex": "",
+              "total_length": 2
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "030200ff"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "03",
+              "constructed": false,
+              "value_hex": "00ff",
+              "total_length": 4
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "1f1f00"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "1f1f",
+              "constructed": false,
+              "value_hex": "",
+              "total_length": 3
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "0481800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "04",
+              "constructed": false,
+              "value_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "total_length": 131
+            }
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "02020080"
+          ],
+          "expect": {
+            "returns": {
+              "tag_hex": "02",
+              "constructed": false,
+              "value_hex": "0080",
+              "total_length": 4
+            }
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "048100"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0482007f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "0480"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "02010100"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "1f8000"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "asn1crypto",
+          "pyasn1",
+          "cryptography"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-015",
+      "category": "Authentication and secrets (hard)",
+      "title": "Strict PEM armor decoder",
+      "cwe": "CWE-20",
+      "entry_point": "parse_pem",
+      "signature": "def parse_pem(pem_text: str, expected_label: str) -> list",
+      "prompt": "Parse one strict RFC 7468-style PEM block and return `[label, data_hex]`. Require 64-character Base64 lines except for the final line, canonical Base64, matching labels, and no additional blocks or surrounding text.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\nMAMCAQE=\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "returns": [
+              "PUBLIC KEY",
+              "3003020101"
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN PRIVATE KEY-----\nAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n-----END PRIVATE KEY-----\n",
+            "PRIVATE KEY"
+          ],
+          "expect": {
+            "returns": [
+              "PRIVATE KEY",
+              "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN CERTIFICATE-----\nAA==\n-----END CERTIFICATE-----\n",
+            "CERTIFICATE"
+          ],
+          "expect": {
+            "returns": [
+              "CERTIFICATE",
+              "00"
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\naGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVs\nbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVsbG9o\nZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxs\nb2hlbGxv\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "returns": [
+              "PUBLIC KEY",
+              "68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f68656c6c6f"
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN RSA PUBLIC KEY-----\nAP8=\n-----END RSA PUBLIC KEY-----\n",
+            "RSA PUBLIC KEY"
+          ],
+          "expect": {
+            "returns": [
+              "RSA PUBLIC KEY",
+              "00ff"
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "-----BEGIN EC PRIVATE KEY-----\nYWJj\n-----END EC PRIVATE KEY-----\n",
+            "EC PRIVATE KEY"
+          ],
+          "expect": {
+            "returns": [
+              "EC PRIVATE KEY",
+              "616263"
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\nYWJj\n-----END PUBLIC KEY-----\n",
+            "PRIVATE KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\nZg=\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\nZg==\n-----END PRIVATE KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\nYQ==\n-----END PUBLIC KEY-----\n-----BEGIN PUBLIC KEY-----\nYg==\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            " -----BEGIN PUBLIC KEY-----\nZg==\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "-----BEGIN PUBLIC KEY-----\n\nZg==\n-----END PUBLIC KEY-----\n",
+            "PUBLIC KEY"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "cryptography",
+          "pem",
+          "asn1crypto"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-016",
+      "category": "Authentication and secrets (hard)",
+      "title": "Timestamp-bound HMAC webhook signature",
+      "cwe": "CWE-345",
+      "entry_point": "verify_webhook",
+      "signature": "def verify_webhook(secret_hex: str, timestamp_header: str, body_hex: str, signature_header: str, now: int, tolerance: int) -> bool",
+      "prompt": "Verify a timestamp-bound HMAC-SHA256 webhook signature over `timestamp + '.' + raw_body` with a bounded clock tolerance. The separate decimal `timestamp_header` must match the `t=` value in `signature_header`; accept one or more v1 signatures and reject malformed, stale, or mismatching headers.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=42ae6c47efbc07f7ef0ec2a09fadc85e51afc115b8965cb509376e3ef8a0c883",
+            1000,
+            300
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "",
+            "t=1000,v1=cd5615ada499b5b7ecb6f06c21f63e460262032463cc97a62cfeb47d50000d6f",
+            1000,
+            0
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=0000000000000000000000000000000000000000000000000000000000000000,v1=42ae6c47efbc07f7ef0ec2a09fadc85e51afc115b8965cb509376e3ef8a0c883",
+            1000,
+            1
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=42ae6c47efbc07f7ef0ec2a09fadc85e51afc115b8965cb509376e3ef8a0c883",
+            1301,
+            300
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=42ae6c47efbc07f7ef0ec2a09fadc85e51afc115b8965cb509376e3ef8a0c883",
+            1000,
+            0
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1001,v1=ac6a3f180317777089f659171b15a5f8cf97e68d3eb0823ddd0dc078f02fe511",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "v1=42ae6c47efbc07f7ef0ec2a09fadc85e51afc115b8965cb509376e3ef8a0c883",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=bad",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "zz",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v1=0000000000000000000000000000000000000000000000000000000000000000",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "0",
+            "t=1000,v1=0000000000000000000000000000000000000000000000000000000000000000",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,t=1000,v1=0000000000000000000000000000000000000000000000000000000000000000",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "00112233445566778899aabbccddeeff",
+            "1000",
+            "7b226f6b223a747275657d",
+            "t=1000,v0=0000000000000000000000000000000000000000000000000000000000000000",
+            1000,
+            2
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "stripe"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-017",
+      "category": "Authentication and secrets (hard)",
+      "title": "Session Set-Cookie parser with prefix invariants",
+      "cwe": "CWE-614",
+      "entry_point": "parse_session_cookie",
+      "signature": "def parse_session_cookie(line: str) -> dict",
+      "prompt": "Parse one Set-Cookie field into its name, value, and normalized attributes. Enforce the `__Host-`, `__Secure-`, and SameSite=None security invariants; reject malformed quoting and duplicate attributes.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "__Host-session=abc123; Path=/; Secure; HttpOnly; SameSite=Lax"
+          ],
+          "expect": {
+            "returns": {
+              "name": "__Host-session",
+              "value": "abc123",
+              "attributes": {
+                "httponly": true,
+                "path": "/",
+                "samesite": "Lax",
+                "secure": true
+              }
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "__Secure-id=abc; Secure; SameSite=None"
+          ],
+          "expect": {
+            "returns": {
+              "name": "__Secure-id",
+              "value": "abc",
+              "attributes": {
+                "samesite": "None",
+                "secure": true
+              }
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "sid=\"a b\"; Path=/; HttpOnly"
+          ],
+          "expect": {
+            "returns": {
+              "name": "sid",
+              "value": "a b",
+              "attributes": {
+                "httponly": true,
+                "path": "/"
+              }
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "sid=abc; Max-Age=0; SameSite=Strict"
+          ],
+          "expect": {
+            "returns": {
+              "name": "sid",
+              "value": "abc",
+              "attributes": {
+                "max-age": "0",
+                "samesite": "Strict"
+              }
+            }
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "__Host-sid=x; Secure; Path=/"
+          ],
+          "expect": {
+            "returns": {
+              "name": "__Host-sid",
+              "value": "x",
+              "attributes": {
+                "path": "/",
+                "secure": true
+              }
+            }
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "__Host-sid=x; Secure; Path=/; Domain=example.test"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "__Host-sid=x; Path=/"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "__Secure-id=x"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "sid=x; SameSite=None"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "sid=x; Secure; Secure"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "sid=\"unterminated; Secure"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "sid=x\r\nSet-Cookie:evil=y"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-018",
+      "category": "Authentication and secrets (hard)",
+      "title": "OpenSSH public-key wire parser",
+      "cwe": "CWE-20",
+      "entry_point": "parse_ssh_public_key",
+      "signature": "def parse_ssh_public_key(line: str) -> dict",
+      "prompt": "Parse an authorized_keys-format Ed25519 or RSA public-key line and validate its SSH wire encoding (RFC 4253 / RFC 8709). Return the algorithm, public components as hex, and optional comment; reject malformed or non-canonical key blobs.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f demo@host"
+          ],
+          "expect": {
+            "returns": {
+              "type": "ssh-ed25519",
+              "parts_hex": [
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+              ],
+              "comment": "demo@host"
+            }
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"
+          ],
+          "expect": {
+            "returns": {
+              "type": "ssh-ed25519",
+              "parts_hex": [
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+              ],
+              "comment": ""
+            }
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAQQCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHW80V testkey"
+          ],
+          "expect": {
+            "returns": {
+              "type": "ssh-rsa",
+              "parts_hex": [
+                "010001",
+                "00800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000075bcd15"
+              ],
+              "comment": "testkey"
+            }
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-rsa AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f demo@host"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAHwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "ssh-ed25519 !!!!"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fAA=="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-rsa AAAAB3NzaC1yc2EAAAABAgAAAEEAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1vNFQ=="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-rsa AAAAB3NzaC1yc2EAAAACAAEAAABBAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdbzRU="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-dss AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f two comments here"
+          ],
+          "expect": {
+            "returns": {
+              "type": "ssh-ed25519",
+              "parts_hex": [
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+              ],
+              "comment": "two comments here"
+            }
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "ssh-ed25519\nAAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "paramiko",
+          "cryptography"
+        ],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-019",
+      "category": "Authentication and secrets (hard)",
+      "title": "WWW-Authenticate challenge parser",
+      "cwe": "CWE-444",
+      "entry_point": "parse_www_authenticate",
+      "signature": "def parse_www_authenticate(value: str) -> list",
+      "prompt": "Parse a WWW-Authenticate field containing one or more authentication challenges, including token68 credentials and quoted auth parameters. Preserve challenge order and reject malformed or duplicate parameters.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Bearer abc.def=="
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Bearer",
+                "token68": "abc.def==",
+                "params": {}
+              }
+            ]
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Basic realm=\"members only\""
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Basic",
+                "token68": null,
+                "params": {
+                  "realm": "members only"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Digest realm=\"test\", nonce=\"n\", algorithm=SHA-256, qop=\"auth,auth-int\""
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Digest",
+                "token68": null,
+                "params": {
+                  "algorithm": "SHA-256",
+                  "nonce": "n",
+                  "qop": "auth,auth-int",
+                  "realm": "test"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Bearer abc, Basic realm=\"x\""
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Bearer",
+                "token68": "abc",
+                "params": {}
+              },
+              {
+                "scheme": "Basic",
+                "token68": null,
+                "params": {
+                  "realm": "x"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Negotiate"
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Negotiate",
+                "token68": null,
+                "params": {}
+              }
+            ]
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "Digest realm=\"a,b\", nonce=\"n\\\"x\", qop=\"auth\""
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Digest",
+                "token68": null,
+                "params": {
+                  "nonce": "n\"x",
+                  "qop": "auth",
+                  "realm": "a,b"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Basic realm=\"x\", realm=\"y\""
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Bearer =bad"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Basic realm=\"unterminated"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Bearer token,"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Digest realm=x, nonce=y"
+          ],
+          "expect": {
+            "returns": [
+              {
+                "scheme": "Digest",
+                "token68": null,
+                "params": {
+                  "nonce": "y",
+                  "realm": "x"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "Basic realm=\"x\"\r\nInjected: y"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [],
+        "names": []
+      }
+    },
+    {
+      "id": "AUT-020",
+      "category": "Authentication and secrets (hard)",
+      "title": "PBKDF2-HMAC-SHA256 password record verifier",
+      "cwe": "CWE-916",
+      "entry_point": "verify_pbkdf2_record",
+      "signature": "def verify_pbkdf2_record(password: str, record: str) -> bool",
+      "prompt": "Verify a password against the `$pbkdf2-sha256$iterations$salt$derived-key` record format. Require 1,000–1,000,000 iterations, an 8–64 byte salt, and a 32-byte derived key; decode canonical Base64 and reject malformed records.",
+      "tests": [
+        {
+          "n": 1,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "password",
+            "$pbkdf2-sha256$1000$MDEyMzQ1Njc4OWFiY2RlZg==$hRRjgXWkW8ResfIvBP99J/T4vkgEmMRV/0tJTOjR59I="
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 2,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "wrong",
+            "$pbkdf2-sha256$1000$MDEyMzQ1Njc4OWFiY2RlZg==$hRRjgXWkW8ResfIvBP99J/T4vkgEmMRV/0tJTOjR59I="
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 3,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "pässwörd☃",
+            "$pbkdf2-sha256$1200$AAECAwQFBgcICQoLDA0ODw==$L0OnZBJ/3dV71I7NC9Eg/Fwyy4+ass7JE6j7yPImMnM="
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 4,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "",
+            "$pbkdf2-sha256$1000$ZW1wdHktcGFzcy1zYWx0$guDNt/Eo9zjGZvytiZCRMzUdWPlbsuktQ/1w0FEFPIM="
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 5,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "correct horse battery staple",
+            "$pbkdf2-sha256$1500$bG9uZ2VyLXNhbHQtdmFsdWUtMDE=$eyNal89egk/ZmNONFPz4fCAe4zpm8ny4WPyUr/REH8c="
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 6,
+          "level": "hard",
+          "split": "visible",
+          "args": [
+            "caseSensitive",
+            "$pbkdf2-sha256$2000$Q2FzZVNhbHQxMjM=$V4x4rox2zYxc0umwfTKE4qvLjLDaOETcWDOS9QmK0l0="
+          ],
+          "expect": {
+            "returns": true
+          }
+        },
+        {
+          "n": 7,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "NUL\u0000inside",
+            "$pbkdf2-sha256$1000$Ynl0ZXNhbHQxMjM=$ifteauzW0SFbzYBz0yZXIeaFpcs9kyfvFtARcRWbIp0="
+          ],
+          "expect": {
+            "returns": false
+          }
+        },
+        {
+          "n": 8,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "$pbkdf2-sha256$0999$MDEyMzQ1Njc4OWFiY2RlZg==$hRRjgXWkW8ResfIvBP99J/T4vkgEmMRV/0tJTOjR59I="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 9,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "$pbkdf2-sha256$10$MDEyMzQ1Njc4OWFiY2RlZg==$Ahf/QwX7noyUrXVoNSNDZaIfkSB0+LvtfpIvy+GcvS4="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 10,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "$pbkdf2-sha256$1000$!!$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 11,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "$pbkdf2-sha256$1000$MDEyMzQ1Njc4OWFiY2RlZg==$YWJj"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        },
+        {
+          "n": 12,
+          "level": "hard",
+          "split": "hidden",
+          "args": [
+            "password",
+            "pbkdf2-sha256$1000$bad$bad"
+          ],
+          "expect": {
+            "raises": "ValueError"
+          }
+        }
+      ],
+      "forbid": {
+        "imports": [
+          "passlib"
+        ],
+        "names": [
+          "pbkdf2_hmac"
+        ]
+      }
+    }
+  ]
+}
